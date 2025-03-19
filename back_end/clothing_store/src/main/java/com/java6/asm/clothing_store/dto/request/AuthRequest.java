@@ -1,4 +1,4 @@
-package com.java6.asm.clothing_store.dto;
+package com.java6.asm.clothing_store.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;

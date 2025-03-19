@@ -3,6 +3,7 @@ package com.java6.asm.clothing_store.configuration;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -37,13 +38,13 @@ public class SecurityConfig {
         http
                 .csrf().disable() // ❌ Tắt CSRF (Cross-Site Request Forgery) vì API không sử dụng session
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login").permitAll()   // ✅ Cho phép truy cập mà không cần đăng nhập
-                        .requestMatchers("/auth/refresh").permitAll() // ✅ Cho phép lấy Access Token mới mà không cần login lại
-                        .requestMatchers("/auth/logout").permitAll()  // ✅ Cho phép logout mà không cần xác thực trước
+                        .requestMatchers("/auth/system/login").permitAll()   // ✅ Cho phép truy cập mà không cần đăng nhập
+                        .requestMatchers("/auth/system/refresh").permitAll() // ✅ Cho phép lấy Access Token mới mà không cần login lại
+                        .requestMatchers("/auth/system/logout").permitAll()  // ✅ Cho phép logout mà không cần xác thực trước
                         .anyRequest().authenticated() // 🚀 Các request khác đều yêu cầu xác thực bằng JWT
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder))); // 🛡️ Sử dụng JWT để xác thực
-
+        http.oauth2Login(Customizer.withDefaults());
         return http.build();
     }
 
@@ -56,7 +57,7 @@ public class SecurityConfig {
         return new WebMvcConfigurer() {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Áp dụng cho tất cả API
-                        .allowedOrigins("http://localhost:8080") // Cho phép frontend truy cập
+                        .allowedOrigins("http://localhost:5173") // Cho phép frontend truy cập
                         .allowedMethods("GET", "POST", "PUT", "DELETE") // Các phương thức HTTP được phép
                         .allowedHeaders("*") // Chấp nhận tất cả headers
                         .allowCredentials(true); // Cho phép gửi cookie (nếu cần)

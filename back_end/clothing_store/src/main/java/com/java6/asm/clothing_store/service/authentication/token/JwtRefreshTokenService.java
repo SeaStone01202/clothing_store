@@ -1,4 +1,4 @@
-package com.java6.asm.clothing_store.service;
+package com.java6.asm.clothing_store.service.authentication.token;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  * - Xóa Refresh Token khỏi Redis khi user logout
  */
 @Service
-public class RefreshTokenService {
+public class JwtRefreshTokenService implements TokenService {
 
     private final RedisTemplate<String, String> redisTemplate;
     private static final long REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60; // ⏳ TTL: 7 ngày
@@ -23,7 +23,7 @@ public class RefreshTokenService {
      *
      * @param redisTemplate Dùng để lưu và truy xuất Refresh Token
      */
-    public RefreshTokenService(RedisTemplate<String, String> redisTemplate) {
+    public JwtRefreshTokenService(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -35,7 +35,7 @@ public class RefreshTokenService {
      * @param username Tên user để liên kết với Refresh Token
      * @return Chuỗi Refresh Token đã tạo
      */
-    public String createRefreshToken(String username) {
+    public String generateToken(String username) {
         String refreshToken = UUID.randomUUID().toString(); // 🔑 Sinh UUID ngẫu nhiên làm token
         redisTemplate.opsForValue().set(
                 "refreshToken:" + refreshToken, // Key: refreshToken:<token>
@@ -53,7 +53,7 @@ public class RefreshTokenService {
      * @param refreshToken Refresh Token cần kiểm tra
      * @return Username nếu token hợp lệ, null nếu không hợp lệ
      */
-    public String validateRefreshToken(String refreshToken) {
+    public String validateToken(String refreshToken) {
         return redisTemplate.opsForValue().get("refreshToken:" + refreshToken);
     }
 
@@ -62,7 +62,7 @@ public class RefreshTokenService {
      *
      * @param refreshToken Refresh Token cần xóa
      */
-    public void deleteRefreshToken(String refreshToken) {
+    public void deleteToken(String refreshToken) {
         redisTemplate.delete("refreshToken:" + refreshToken);
     }
 }
