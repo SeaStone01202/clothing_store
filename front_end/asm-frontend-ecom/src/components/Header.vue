@@ -36,21 +36,27 @@
           <!-- Dropdown Tài khoản -->
           <div class="dropdown">
             <button class="btn btn-light dropdown-toggle" type="button" id="accountDropdown" data-bs-toggle="dropdown">
-              👤 Tài khoản
+              👤 {{ isAuthenticated ? userInfo.fullname || userInfo.email : "Tài khoản" }}
             </button>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
-              <li><router-link class="dropdown-item" to="/login">🔑 Đăng nhập</router-link></li>
-              <li><router-link class="dropdown-item" to="/register">📝 Đăng ký</router-link></li>
-              <li><router-link class="dropdown-item" to="/forgot-password">🔄 Quên mật khẩu</router-link></li>
-              
-              <li><hr class="dropdown-divider" /></li>
+              <template v-if="!isAuthenticated">
+                <li><router-link class="dropdown-item" to="/login">🔑 Đăng nhập</router-link></li>
+                <li><router-link class="dropdown-item" to="/register">📝 Đăng ký</router-link></li>
+                <li><router-link class="dropdown-item" to="/forgot-password">🔄 Quên mật khẩu</router-link></li>
+              </template>
 
-              <li><router-link class="dropdown-item" to="/edit-profile">✏️ Chỉnh sửa hồ sơ</router-link></li>
-              <li><router-link class="dropdown-item" to="/order-history">📜 Lịch sử mua hàng</router-link></li>
-              <li><router-link class="dropdown-item" to="/admin">⚙️ Quản trị viên</router-link></li>
-
-              <li><hr class="dropdown-divider" /></li>
-              <li><router-link class="dropdown-item text-danger" to="/logout">🚪 Đăng xuất</router-link></li>
+              <template v-else>
+                <li class="dropdown-item">👋 Xin chào: {{ userInfo.email || "Người dùng" }}</li>
+                <li><router-link class="dropdown-item" to="/edit-profile">✏️ Chỉnh sửa hồ sơ</router-link></li>
+                <li><router-link class="dropdown-item" to="/order-history">📜 Lịch sử mua hàng</router-link></li>
+                <li v-if="userInfo.role === 'ADMIN'">
+                  <router-link class="dropdown-item" to="/admin">⚙️ Quản trị viên</router-link>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <button class="dropdown-item text-danger" @click="handleLogout">🚪 Đăng xuất</button>
+                </li>
+              </template>
             </ul>
           </div>
         </div>
@@ -58,6 +64,33 @@
     </div>
   </nav>
 </template>
+
+<script setup>
+import { computed, watchEffect } from "vue";
+import { useAuthStore } from "@/stores/AuthStore";
+import { useRouter } from "vue-router";
+
+const authStore = useAuthStore();
+const router = useRouter();
+
+// ✅ Kiểm tra đăng nhập
+const isAuthenticated = computed(() => authStore.isAuthenticated());
+const userInfo = computed(() => authStore.user || { email: "Không có email", role: "CUSTOMER" });
+
+// ✅ Theo dõi thay đổi của accessToken để cập nhật UI ngay khi login/logout
+watchEffect(() => {
+  if (authStore.accessToken) {
+    authStore.fetchUserInfo(); // 🔥 Load user info ngay sau khi login
+  }
+});
+
+// ✅ Xử lý đăng xuất
+const handleLogout = async () => {
+  await authStore.logout();
+  router.push("/login"); // ✅ Quay về trang login
+};
+</script>
+
 
 <style scoped>
 .navbar {

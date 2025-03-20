@@ -1,6 +1,6 @@
-package com.java6.asm.clothing_store.service.authentication.token;
+package com.java6.asm.clothing_store.service.authentication;
 
-public interface TokenService {
+public interface AccessTokenService {
 
     String generateToken(String username);
 

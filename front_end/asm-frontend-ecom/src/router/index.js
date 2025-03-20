@@ -19,7 +19,8 @@ const routes = [
   { path: '/forgot-password', component: ForgotPasswordView },
   { path: '/edit-profile', component: EditProfileView },
   { path: '/order-history', component: OrderHistoryView },
-  { path: '/admin', component: AdminView }
+  { path: '/admin', component: AdminView },
+  // { path: "/auth/zalo/callback", component: ZaloCallback }, // 🔥 Thêm route callback
 ];
 
 const router = createRouter({

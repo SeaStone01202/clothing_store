@@ -1,14 +1,14 @@
 package com.java6.asm.clothing_store.dto.mapper;
 
 import com.java6.asm.clothing_store.dto.request.UserRegisterRequest;
-import com.java6.asm.clothing_store.dto.response.UserRegisterResponse;
+import com.java6.asm.clothing_store.dto.response.SystemUserRegisterResponse;
 import com.java6.asm.clothing_store.entity.User;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
-public interface UserMapper {
+public interface SystemUserMapper {
 
-    UserRegisterResponse toResponse(User user);
+    SystemUserRegisterResponse toResponse(User user);
 
     User toEntity(UserRegisterRequest registerRequest);
 }

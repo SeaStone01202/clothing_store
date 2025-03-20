@@ -25,7 +25,6 @@ public class ApplicationInitConfig {
         return args -> {
             if (userRepository.findByEmail("admin@gmail.com").isEmpty()) {
                 User user = User.builder()
-                        .username("admin")
                         .email("admin@gmail.com")
                         .password(passwordEncoder.encode("admin"))
                         .role(RoleEnum.ADMIN)

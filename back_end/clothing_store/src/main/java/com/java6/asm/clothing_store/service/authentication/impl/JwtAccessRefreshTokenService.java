@@ -1,5 +1,7 @@
-package com.java6.asm.clothing_store.service.authentication.token;
+package com.java6.asm.clothing_store.service.authentication.impl;
 
+import com.java6.asm.clothing_store.service.authentication.AccessTokenService;
+import com.java6.asm.clothing_store.service.authentication.RefreshTokenService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
@@ -10,7 +12,7 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 @AllArgsConstructor
-public class JwtAccessTokenService implements TokenService {
+public class JwtAccessRefreshTokenService implements AccessTokenService {
 
     private final JwtEncoder jwtEncoder;
 

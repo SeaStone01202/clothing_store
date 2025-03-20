@@ -6,21 +6,33 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
-@AllArgsConstructor
 public class SecurityConfig {
 
     private final JwtDecoder jwtDecoder;
 
+    public SecurityConfig(JwtDecoder jwtDecoder) {
+        this.jwtDecoder = jwtDecoder;
+    }
+
+    private final String[] PUBLIC_URLS = {
+            "/auth/system/*",
+            "/auth/google/*",
+            "/auth/zalo/*",
+    };
     /**
      * ✅ Cấu hình bảo mật cho ứng dụng Spring Security
      * - Ngăn chặn truy cập trái phép vào các API
@@ -36,17 +48,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable() // ❌ Tắt CSRF (Cross-Site Request Forgery) vì API không sử dụng session
+                .csrf(AbstractHttpConfigurer::disable) // ❌ Tắt CSRF (vì API không dùng session)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/system/login").permitAll()   // ✅ Cho phép truy cập mà không cần đăng nhập
-                        .requestMatchers("/auth/system/refresh").permitAll() // ✅ Cho phép lấy Access Token mới mà không cần login lại
-                        .requestMatchers("/auth/system/logout").permitAll()  // ✅ Cho phép logout mà không cần xác thực trước
-                        .anyRequest().authenticated() // 🚀 Các request khác đều yêu cầu xác thực bằng JWT
+                        .requestMatchers("/auth/system/**").permitAll() // ✅ Cho phép đăng nhập và đăng ký SystemAuth
+                        .requestMatchers("/auth/google/**").permitAll() // ✅ Cho phép đăng nhập Google
+                        .anyRequest().authenticated() // 🚀 Các request khác cần xác thực
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder))); // 🛡️ Sử dụng JWT để xác thực
-        http.oauth2Login(Customizer.withDefaults());
+                .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("/auth/google/success", true) // ✅ Xử lý khi đăng nhập Google thành công
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(Customizer.withDefaults()) // 🛡️ Xác thực JWT cho tài khoản System
+                );
+
         return http.build();
     }
+
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

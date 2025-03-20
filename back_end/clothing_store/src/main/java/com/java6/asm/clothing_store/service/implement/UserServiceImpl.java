@@ -3,9 +3,9 @@ package com.java6.asm.clothing_store.service.implement;
 import com.java6.asm.clothing_store.constance.RoleEnum;
 import com.java6.asm.clothing_store.constance.StatusEnum;
 import com.java6.asm.clothing_store.constance.TypeAccountEnum;
-import com.java6.asm.clothing_store.dto.mapper.UserMapper;
+import com.java6.asm.clothing_store.dto.mapper.SystemUserMapper;
 import com.java6.asm.clothing_store.dto.request.UserRegisterRequest;
-import com.java6.asm.clothing_store.dto.response.UserRegisterResponse;
+import com.java6.asm.clothing_store.dto.response.SystemUserRegisterResponse;
 import com.java6.asm.clothing_store.entity.User;
 import com.java6.asm.clothing_store.repository.UserRepository;
 import com.java6.asm.clothing_store.service.UserService;
@@ -25,14 +25,13 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final UserMapper userMapper;
+    private final SystemUserMapper systemUserMapper;
 
     @Transactional
     @Override
-    public UserRegisterResponse createUser(UserRegisterRequest request) {
+    public SystemUserRegisterResponse createUser(UserRegisterRequest request) {
 
         User newUser = User.builder()
-                .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .email(request.getEmail())
                 .fullname(request.getFullname())
@@ -41,11 +40,11 @@ public class UserServiceImpl implements UserService {
                 .type(TypeAccountEnum.SYSTEM)
                 .createdAt(LocalDate.now())
                 .build();
-        return userMapper.toResponse(userRepository.save(newUser));
+        return systemUserMapper.toResponse(userRepository.save(newUser));
     }
 
     @Override
-    public UserRegisterResponse updateUser(UserRegisterRequest userRegisterRequest, Integer id) {
+    public SystemUserRegisterResponse updateUser(UserRegisterRequest userRegisterRequest, Integer id) {
         return null;
     }
 
@@ -55,12 +54,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserRegisterResponse> retrieveAllUsers() {
+    public List<SystemUserRegisterResponse> retrieveAllUsers() {
         return List.of();
     }
 
     @Override
-    public UserRegisterResponse retrieveUserById(Integer userId) {
+    public SystemUserRegisterResponse retrieveUserById(Integer userId) {
         return null;
     }
 }

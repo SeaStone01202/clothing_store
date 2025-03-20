@@ -12,21 +12,18 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRegisterResponse {
-
-    private String username;
+public class SystemUserRegisterResponse {
 
     private String fullname;
 
     private String email;
 
-    private String password;
-
     private RoleEnum role;
+
+    private String image;
 
     private StatusEnum status;
 
     private TypeAccountEnum type;
 
-    private LocalDate createdAt;
 }
