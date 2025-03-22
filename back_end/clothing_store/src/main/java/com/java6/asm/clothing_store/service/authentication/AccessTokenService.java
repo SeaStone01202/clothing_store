@@ -5,6 +5,4 @@ public interface AccessTokenService {
     String generateToken(String username);
 
     String validateToken(String token);
-
-    void deleteToken(String token);
 }

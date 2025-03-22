@@ -7,4 +7,10 @@ public interface RefreshTokenService {
     String validateToken(String token);
 
     boolean deleteToken(String token);
+
+    int countDevices(String email);
+
+    boolean existsTokenForDevice(String email, String deviceId);
+
+    String getTokenForDevice(String email, String deviceId);
 }

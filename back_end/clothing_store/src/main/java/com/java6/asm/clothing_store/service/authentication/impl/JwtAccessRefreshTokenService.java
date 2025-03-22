@@ -1,7 +1,8 @@
 package com.java6.asm.clothing_store.service.authentication.impl;
 
+import com.java6.asm.clothing_store.exception.AppException;
+import com.java6.asm.clothing_store.exception.ErrorCode;
 import com.java6.asm.clothing_store.service.authentication.AccessTokenService;
-import com.java6.asm.clothing_store.service.authentication.RefreshTokenService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
@@ -45,12 +46,8 @@ public class JwtAccessRefreshTokenService implements AccessTokenService {
             Jwt decodedToken = jwtDecoder.decode(token); // 👈 Decode token để kiểm tra
             return decodedToken.getSubject(); // Trả về username nếu token hợp lệ
         } catch (JwtException e) {
-            return null; // ❌ Token không hợp lệ hoặc hết hạn
+            throw new AppException(ErrorCode.ACCESS_TOKEN_INVALID);
         }
     }
 
-    @Override
-    public void deleteToken(String token) {
-
-    }
 }

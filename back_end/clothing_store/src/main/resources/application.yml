@@ -2,6 +2,13 @@ spring:
   application:
     name: clothing_store
 
+  logging:
+    level:
+      org.springframework.security: DEBUG
+      org.springframework.web: DEBUG
+      org.springframework.data.redis: DEBUG
+      org.springframework.jdbc: DEBUG
+
   datasource:
     url: jdbc:mysql://localhost:3306/clothingstore
     username: root

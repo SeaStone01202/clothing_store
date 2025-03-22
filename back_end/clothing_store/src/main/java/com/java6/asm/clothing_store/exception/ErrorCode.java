@@ -20,7 +20,7 @@ public enum ErrorCode {
     ACCESS_TOKEN_INVALID(2002, "Access Token không hợp lệ hoặc đã hết hạn!", HttpStatus.UNAUTHORIZED),
     TOKEN_EXPIRED(2003, "Token đã hết hạn, vui lòng đăng nhập lại!", HttpStatus.UNAUTHORIZED),
     TOKEN_MISSING(2004, "Không tìm thấy Token!", HttpStatus.UNAUTHORIZED),
-    TOO_MANY_DEVICES(2005, "Giới hạn đăng nhập là 3 thiết bị", HttpStatus.INTERNAL_SERVER_ERROR),
+    TOO_MANY_DEVICES(2005, "Giới hạn đăng nhập là 3 thiết bị", HttpStatus.OK),
 
     // 🔥 Lỗi liên quan đến Sản phẩm
     PRODUCT_NOT_EXISTED(3001, "Sản phẩm không tồn tại!", HttpStatus.NOT_FOUND),

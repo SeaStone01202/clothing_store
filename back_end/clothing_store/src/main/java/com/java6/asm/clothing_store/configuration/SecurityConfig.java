@@ -1,32 +1,23 @@
 package com.java6.asm.clothing_store.configuration;
 
-import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.List;
-
 @Configuration
 @EnableWebSecurity
+@Order(2) // 🚀 Xử lý sau cấu hình dành cho refresh token
 public class SecurityConfig {
-
-    private final JwtDecoder jwtDecoder;
-
-    public SecurityConfig(JwtDecoder jwtDecoder) {
-        this.jwtDecoder = jwtDecoder;
-    }
 
     private final String[] PUBLIC_URLS = {
             "/auth/system/*",
@@ -46,23 +37,35 @@ public class SecurityConfig {
      * @throws Exception Nếu có lỗi trong quá trình cấu hình bảo mật
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable) // ❌ Tắt CSRF (vì API không dùng session)
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/system/**").permitAll() // ✅ Cho phép đăng nhập và đăng ký SystemAuth
-                        .requestMatchers("/auth/google/**").permitAll() // ✅ Cho phép đăng nhập Google
-                        .anyRequest().authenticated() // 🚀 Các request khác cần xác thực
+                        .requestMatchers(
+                                "/auth/system/login",
+//                                "/auth/system/refresh",  // ✅ Cho phép truy cập refresh token
+                                "/auth/system/logout"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint) // 🔥 Gắn EntryPoint xử lý lỗi 401
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .defaultSuccessUrl("/auth/google/success", true) // ✅ Xử lý khi đăng nhập Google thành công
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(Customizer.withDefaults()) // 🛡️ Xác thực JWT cho tài khoản System
-                );
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                )
+//                .addFilterBefore(jwtRequestFilter, AbstractPreAuthenticatedProcessingFilter.class); // 🚀 Thêm filter trước JWT
+
+        ;
 
         return http.build();
     }
+
 
 
 
@@ -70,9 +73,11 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
+
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
+            @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Áp dụng cho tất cả API
                         .allowedOrigins("http://localhost:5173") // Cho phép frontend truy cập

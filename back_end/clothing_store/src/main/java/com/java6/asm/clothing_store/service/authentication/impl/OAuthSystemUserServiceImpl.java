@@ -8,6 +8,7 @@ import com.java6.asm.clothing_store.exception.AppException;
 import com.java6.asm.clothing_store.exception.ErrorCode;
 import com.java6.asm.clothing_store.repository.UserRepository;
 import com.java6.asm.clothing_store.service.authentication.AccessTokenService;
+import com.java6.asm.clothing_store.service.authentication.DeviceManagementService;
 import com.java6.asm.clothing_store.service.authentication.OAuthSystemUserService;
 import com.java6.asm.clothing_store.service.authentication.RefreshTokenService;
 import jakarta.servlet.http.Cookie;
@@ -33,6 +34,7 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
 
     private final RefreshTokenService jwtRefreshTokenService;
 
+    private final DeviceManagementService deviceManagementService;
     /**
      * ✅ Đăng nhập & tạo Access Token + Refresh Token
      */
@@ -53,11 +55,13 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
                 .map(userResponseMapper::toResponse)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        String email = userChecked.getEmail();
 
+        String deviceId = request.getDeviceId();
 
-        String accessToken = jwtAccessTokenService.generateToken(userChecked.getEmail());
+        String refreshToken = deviceManagementService.getOrGenerateRefreshToken(email, deviceId);
 
-        String refreshToken = jwtRefreshTokenService.generateToken(userChecked.getEmail(), request.getDeviceId());
+        String accessToken = jwtAccessTokenService.generateToken(email);
 
         Cookie refreshTokenCookie = createRefreshTokenCookie(refreshToken);
 
@@ -90,14 +94,11 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
      */
     @Override
     public String logout(String refreshToken, HttpServletResponse response) {
+        boolean deleted = deviceManagementService.removeRefreshToken(refreshToken);
 
-        boolean checkRefreshTokenIvalid = jwtRefreshTokenService.deleteToken(refreshToken);
-
-        if (checkRefreshTokenIvalid) {
+        if (deleted) {
             Cookie expiredCookie = createExpiredRefreshTokenCookie();
-
             response.addCookie(expiredCookie);
-
             return "Đăng xuất thành công";
         }
 
