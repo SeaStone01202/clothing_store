@@ -17,26 +17,29 @@
           </li>
         </ul>
 
-        <!-- Search Bar -->
-        <form class="d-flex me-3">
-          <input class="form-control me-2" type="search" placeholder="🔍 Tìm kiếm sản phẩm..." />
-          <button class="btn btn-outline-primary" type="submit">Tìm</button>
-        </form>
-
         <!-- Icons -->
         <div class="d-flex align-items-center">
           <!-- Giỏ hàng -->
           <router-link class="nav-link text-dark position-relative me-3" to="/cart">
             🛒 Giỏ hàng
-            <span class="badge bg-danger rounded-circle position-absolute top-0 start-100 translate-middle">
-              2
+            <span
+              v-if="cartStore.cartItemCount > 0"
+              class="badge bg-danger rounded-circle position-absolute top-0 start-100 translate-middle"
+            >
+              {{ cartStore.cartItemCount }}
             </span>
           </router-link>
 
           <!-- Dropdown Tài khoản -->
           <div class="dropdown">
             <button class="btn btn-light dropdown-toggle" type="button" id="accountDropdown" data-bs-toggle="dropdown">
-              👤 {{ isAuthenticated ? userInfo.fullname || userInfo.email : "Tài khoản" }}
+              <img
+                :src="userInfo.image || 'https://ui-avatars.com/api/?name=John+Doe'"
+                alt="Avatar"
+                class="rounded-circle me-2 img-fluid"
+                style="width: 32px; height: 32px; object-fit: cover;"
+              />
+              {{ isAuthenticated ? userInfo.fullname || userInfo.email : "Tài khoản" }}
             </button>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
               <template v-if="!isAuthenticated">
@@ -57,6 +60,7 @@
                   <button class="dropdown-item text-danger" @click="handleLogout">🚪 Đăng xuất</button>
                 </li>
               </template>
+              <button class="dropdown-item text-danger" @click="handleRefreshToken">🚪 Refresh token</button>
             </ul>
           </div>
         </div>
@@ -66,31 +70,39 @@
 </template>
 
 <script setup>
-import { computed, watchEffect } from "vue";
-import { useAuthStore } from "@/stores/AuthStore";
-import { useRouter } from "vue-router";
+import { computed, watchEffect } from 'vue';
+import { useAuthStore } from '@/stores/AuthStore';
+import { useCartStore } from '@/stores/CartStore';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
+const cartStore = useCartStore();
 const router = useRouter();
 
-// ✅ Kiểm tra đăng nhập
+// Kiểm tra đăng nhập
 const isAuthenticated = computed(() => authStore.isAuthenticated());
-const userInfo = computed(() => authStore.user || { email: "Không có email", role: "CUSTOMER" });
+const userInfo = computed(() => authStore.user || { email: 'Không có email', role: 'CUSTOMER' });
 
-// ✅ Theo dõi thay đổi của accessToken để cập nhật UI ngay khi login/logout
-watchEffect(() => {
+// Theo dõi thay đổi của accessToken để cập nhật UI và lấy giỏ hàng
+watchEffect(async () => {
   if (authStore.accessToken) {
-    authStore.fetchUserInfo(); // 🔥 Load user info ngay sau khi login
+    await authStore.fetchUserInfo(); // Load user info ngay sau khi login
+    await cartStore.fetchCart(); // Load giỏ hàng ngay sau khi login
+  } else {
+    cartStore.cart = null; // Xóa giỏ hàng khi đăng xuất
   }
 });
 
-// ✅ Xử lý đăng xuất
+const handleRefreshToken = async () => {
+  await authStore.refreshAccessToken();
+};
+
+// Xử lý đăng xuất
 const handleLogout = async () => {
   await authStore.logout();
-  router.push("/login"); // ✅ Quay về trang login
+  router.push('/login'); // Quay về trang login
 };
 </script>
-
 
 <style scoped>
 .navbar {
