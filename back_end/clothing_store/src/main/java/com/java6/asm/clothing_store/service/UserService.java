@@ -1,20 +1,22 @@
 package com.java6.asm.clothing_store.service;
 
 import com.java6.asm.clothing_store.dto.request.UserRegisterRequest;
+import com.java6.asm.clothing_store.dto.request.UserRequest;
 import com.java6.asm.clothing_store.dto.response.SystemUserRegisterResponse;
+import com.java6.asm.clothing_store.dto.response.UserResponse;
 
 import java.util.List;
 
 public interface UserService {
 
-    SystemUserRegisterResponse createUser(UserRegisterRequest userRegisterRequest);
+    UserResponse createUser(UserRegisterRequest request);
 
-    SystemUserRegisterResponse updateUser(UserRegisterRequest userRegisterRequest, Integer id);
+    UserResponse updateUser(UserRequest request);
 
     void deleteUser(Integer userId);
 
-    List<SystemUserRegisterResponse> retrieveAllUsers();
+    List<UserResponse> retrieveAllUsers();
 
-    SystemUserRegisterResponse retrieveUserById(Integer userId);
+    UserResponse retrieveUserByEmail(String  email);
 
 }

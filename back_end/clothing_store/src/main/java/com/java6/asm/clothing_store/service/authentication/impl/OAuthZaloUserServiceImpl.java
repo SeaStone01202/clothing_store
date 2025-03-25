@@ -44,7 +44,7 @@ public class OAuthZaloUserServiceImpl implements OAuthZaloUserService {
         String generatedEmail = zaloUser.getZaloId() + "@zalo.com"; // 🔥 Tạo email giả từ ID Zalo
 
         // 📌 Bước 4: Kiểm tra nếu user đã tồn tại trong DB
-        return userRepository.findByEmail(generatedEmail)  // 🔥 Dùng email làm định danh
+        return userRepository.findByEmailAndStatus(generatedEmail, StatusEnum.ACTIVE)  // 🔥 Dùng email làm định danh
                 .map(zaloUserMapper::toResponse) // Nếu có, trả về DTO
                 .orElseGet(() -> createUser(zaloUser, generatedEmail));
     }

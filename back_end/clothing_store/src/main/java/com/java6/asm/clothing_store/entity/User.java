@@ -1,5 +1,6 @@
 package com.java6.asm.clothing_store.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.java6.asm.clothing_store.constance.RoleEnum;
 import com.java6.asm.clothing_store.constance.StatusEnum;
 import com.java6.asm.clothing_store.constance.TypeAccountEnum;
@@ -53,6 +54,7 @@ public class User {
     private LocalDate updatedAt;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference // Đánh dấu phía không được serialize
     private Cart cart;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

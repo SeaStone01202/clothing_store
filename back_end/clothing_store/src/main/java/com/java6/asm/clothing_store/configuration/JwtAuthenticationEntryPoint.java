@@ -20,7 +20,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         String requestURI = request.getRequestURI();
 
         if (requestURI.contains("/auth/system/refresh")) {
-//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
         } else {
 
             response.setContentType("application/json");

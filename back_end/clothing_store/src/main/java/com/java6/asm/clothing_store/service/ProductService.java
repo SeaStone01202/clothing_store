@@ -1,5 +1,6 @@
 package com.java6.asm.clothing_store.service;
 
+import com.java6.asm.clothing_store.constance.StatusEnum;
 import com.java6.asm.clothing_store.dto.request.ProductRequest;
 import com.java6.asm.clothing_store.dto.response.ProductResponse;
 import org.springframework.data.domain.Page;
@@ -17,11 +18,17 @@ public interface ProductService {
 
     ProductResponse getProduct(Integer productId);
 
-    List<ProductResponse> retrieveAllProducts();
+    Page<ProductResponse> findAll(int page);
 
-    Page<ProductResponse> findAll(Pageable pageable);
+    Page<ProductResponse> findByCategory(String category, int pageable);
 
-    Page<ProductResponse> findByCategory(String category, Pageable pageable);
+    Page<ProductResponse> findByName(String name, int pageable);
 
-    Page<ProductResponse> findByName(String name, Pageable pageable);
+    Page<ProductResponse> findByCategoryAndPrice(Double min, Double max, String category, int pageable);
+
+    Page<ProductResponse> findByPrice(Double min, Double max, int pageable);
+
+    ProductResponse findById(Integer id);
+
+    Page<ProductResponse> findRelatedProducts(String categoryName, Integer excludeId, int page);
 }

@@ -1,7 +1,6 @@
 package com.java6.asm.clothing_store.dto.mapper;
 
 import com.java6.asm.clothing_store.dto.request.UserRequest;
-import com.java6.asm.clothing_store.dto.response.UserResponse;
 import com.java6.asm.clothing_store.entity.User;
 import org.mapstruct.Mapper;
 

@@ -25,6 +25,7 @@ public enum ErrorCode {
     // 🔥 Lỗi liên quan đến Sản phẩm
     PRODUCT_NOT_EXISTED(3001, "Sản phẩm không tồn tại!", HttpStatus.NOT_FOUND),
     PRODUCT_ALREADY_EXISTED(3005, "Sản phẩm đã tồn tại!", HttpStatus.CONFLICT),
+    INVALID_QUANTITY(3002, "Số lượng không phù hợp hoặc hết hàng", HttpStatus.BAD_REQUEST),
 
     // 🔥 Lỗi liên quan đến Danh mục
     CATEGORY_EXISTED(4001, "Danh mục đã tồn tại!", HttpStatus.CONFLICT),
@@ -34,6 +35,8 @@ public enum ErrorCode {
     CART_ITEM_ALREADY_EXISTS(5001, "Sản phẩm đã có trong giỏ hàng!", HttpStatus.CONFLICT),
     CART_ITEM_NOT_FOUND(5002, "Không tìm thấy sản phẩm trong giỏ hàng!", HttpStatus.NOT_FOUND),
     INVALID_CART_ITEM(5003, "Sản phẩm trong giỏ hàng không hợp lệ!", HttpStatus.BAD_REQUEST),
+    CART_NOT_FOUND(5004, "Giỏ hàng không tồn tại", HttpStatus.NOT_FOUND),
+    PRODUCT_NOT_FOUND(5005, "Sản phẩm không tồn tại", HttpStatus.NOT_FOUND),
 
     // 🔥 Lỗi liên quan đến Đơn hàng
     ORDER_NOT_FOUND(6001, "Không tìm thấy đơn hàng!", HttpStatus.NOT_FOUND),
@@ -53,6 +56,8 @@ public enum ErrorCode {
     INVALID_REQUEST_BODY(8004, "Dữ liệu gửi lên không hợp lệ!", HttpStatus.BAD_REQUEST),
     CREATE_PAYMENT_FAILED(8005, "Thanh toán thất bại!", HttpStatus.INTERNAL_SERVER_ERROR),
     UNCATEGORIZED_EXCEPTION(9999, "Lỗi không xác định!", HttpStatus.INTERNAL_SERVER_ERROR);
+
+
 
     private final int code;
     private final String message;

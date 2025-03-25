@@ -1,5 +1,8 @@
 package com.java6.asm.clothing_store.configuration;
 
+import com.java6.asm.clothing_store.utils.PageUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -10,20 +13,25 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
 @Order(2) // 🚀 Xử lý sau cấu hình dành cho refresh token
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+
     private final String[] PUBLIC_URLS = {
-            "/auth/system/*",
+            "/auth/system/login",
+            "/auth/system/register",
             "/auth/google/*",
             "/auth/zalo/*",
     };
+
+
     /**
      * ✅ Cấu hình bảo mật cho ứng dụng Spring Security
      * - Ngăn chặn truy cập trái phép vào các API
@@ -39,28 +47,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // ❌ Tắt CSRF (vì API không dùng session)
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/system/login",
-//                                "/auth/system/refresh",  // ✅ Cho phép truy cập refresh token
                                 "/auth/system/logout"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint) // 🔥 Gắn EntryPoint xử lý lỗi 401
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .defaultSuccessUrl("/auth/google/success", true) // ✅ Xử lý khi đăng nhập Google thành công
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(Customizer.withDefaults()) // 🛡️ Xác thực JWT cho tài khoản System
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
-//                .addFilterBefore(jwtRequestFilter, AbstractPreAuthenticatedProcessingFilter.class); // 🚀 Thêm filter trước JWT
-
+                .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("/auth/google/success", true)
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(Customizer.withDefaults())
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                )
         ;
 
         return http.build();
@@ -74,19 +79,15 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(10);
     }
 
+
+
     @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // Áp dụng cho tất cả API
-                        .allowedOrigins("http://localhost:5173") // Cho phép frontend truy cập
-                        .allowedMethods("GET", "POST", "PUT", "DELETE") // Các phương thức HTTP được phép
-                        .allowedHeaders("*") // Chấp nhận tất cả headers
-                        .allowCredentials(true); // Cho phép gửi cookie (nếu cần)
-            }
-        };
+    public PageUtil pageUtil() {
+        return new PageUtil();
     }
 
-
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
 }

@@ -4,15 +4,13 @@ spring:
 
   logging:
     level:
-      org.springframework.security: DEBUG
-      org.springframework.web: DEBUG
-      org.springframework.data.redis: DEBUG
-      org.springframework.jdbc: DEBUG
+      org.springframework: DEBUG
+      com.java6.asm.clothing_store: DEBUG
 
   datasource:
-    url: jdbc:mysql://localhost:3306/clothingstore
-    username: root
-    password: admin123
+    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/clothingstore}
+    username: ${DATABASE_USERNAME:root}
+    password: ${DATABASE_PASSWORD:admin123}
 
   jpa:
     properties:
@@ -23,21 +21,38 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6379
-      timeout: 6000
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: ${REDIS_TIMEOUT:6000}
       lettuce:
         pool:
-          max-active: 10
-          max-idle: 5
-          min-idle: 2
-          max-wait: 2000
+          max-active: ${REDIS_POOL_MAX_ACTIVE:10}
+          max-idle: ${REDIS_POOL_MAX_IDLE:5}
+          min-idle: ${REDIS_POOL_MIN_IDLE:2}
+          max-wait: ${REDIS_POOL_MAX_WAIT:2000}
 
   security:
     oauth2:
       client:
         registration:
           google:
-            client-id: 48118088678-cbdk6ns2d8a8bba01enlc4ja6fmdgs4f.apps.googleusercontent.com
-            client-secret: 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
-#            redirect-uri: "http://localhost:5173/"
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/auth/google/success}
+
+admin:
+  email: ${ADMIN_EMAIL}
+  password: ${ADMIN_PASSWORD}
+
+# Cấu hình CORS
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGIN_1}
+
+# Cấu hình bổ sung để tăng bảo mật
+server:
+  servlet:
+    session:
+      cookie:
+        secure: ${SESSION_COOKIE_SECURE:false}
+        http-only: true
+  port: ${SERVER_PORT:8080}

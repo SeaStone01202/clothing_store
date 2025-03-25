@@ -4,11 +4,13 @@ import com.java6.asm.clothing_store.dto.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -37,22 +39,22 @@ public class GlobalExceptionHandler {
                 body(apiResponse);
     }
 
-    @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    ResponseEntity<ApiResponse> handlingMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
-
-        String enumKey = exception.getFieldError().getDefaultMessage();
-        ErrorCode errorCode = ErrorCode.INVALID_KEY;
-        try {
-            errorCode = ErrorCode.valueOf(enumKey);
-        } catch (IllegalArgumentException e) {
-
-        }
-        ApiResponse apiResponse = ApiResponse.builder().
-                status(errorCode.getCode()).
-                message(errorCode.getMessage()).build();
-
-        return ResponseEntity.badRequest().body(apiResponse);
-    }
+//    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+//    ResponseEntity<ApiResponse> handlingMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+//
+//        String enumKey = exception.getFieldError().getDefaultMessage();
+//        ErrorCode errorCode = ErrorCode.INVALID_KEY;
+//        try {
+//            errorCode = ErrorCode.valueOf(enumKey);
+//        } catch (IllegalArgumentException e) {
+//
+//        }
+//        ApiResponse apiResponse = ApiResponse.builder().
+//                status(errorCode.getCode()).
+//                message(errorCode.getMessage()).build();
+//
+//        return ResponseEntity.badRequest().body(apiResponse);
+//    }
 
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ApiResponse> handlingAccessDeniedException(AccessDeniedException exception) {
@@ -75,4 +77,20 @@ public class GlobalExceptionHandler {
                 data(details)
                 .build());
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationException(MethodArgumentNotValidException exception) {
+        Map<String, String> errors = exception.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(Collectors.toMap(
+                        FieldError::getField,  // Lấy tên trường bị lỗi
+                        FieldError::getDefaultMessage, // Lấy nội dung lỗi
+                        (existingValue, newValue) -> existingValue // Nếu có nhiều lỗi cùng 1 field, giữ lỗi đầu tiên
+                ));
+
+        return ResponseEntity.badRequest().body(ApiResponse.error(400, "Dữ liệu không hợp lệ", errors));
+    }
+
+
 }

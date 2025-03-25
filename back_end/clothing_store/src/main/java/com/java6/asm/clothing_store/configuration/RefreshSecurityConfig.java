@@ -12,10 +12,20 @@ import org.springframework.security.web.SecurityFilterChain;
 @Order(1) // 🔥 Ưu tiên chạy trước `SecurityConfig`
 public class RefreshSecurityConfig {
 
+    private String[] urls = {
+            "/auth/system/refresh",
+            "/user/login",
+            "/user/logout",
+            "/user/register",
+            "/product/list",
+            "/product/**",
+            "/product"
+    };
+
     @Bean
     public SecurityFilterChain refreshSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/auth/system/refresh") // ✅ Chỉ áp dụng cho `/auth/system/refresh`
+                .securityMatcher(urls) // ✅ Chỉ áp dụng cho `/auth/system/refresh`
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()) // 🚀 Bỏ qua xác thực
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults());

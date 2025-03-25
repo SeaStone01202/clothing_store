@@ -3,10 +3,13 @@ package com.java6.asm.clothing_store.service.implement;
 import com.java6.asm.clothing_store.constance.RoleEnum;
 import com.java6.asm.clothing_store.constance.StatusEnum;
 import com.java6.asm.clothing_store.constance.TypeAccountEnum;
-import com.java6.asm.clothing_store.dto.mapper.SystemUserMapper;
+import com.java6.asm.clothing_store.dto.mapper.UserResponseMapper;
 import com.java6.asm.clothing_store.dto.request.UserRegisterRequest;
-import com.java6.asm.clothing_store.dto.response.SystemUserRegisterResponse;
+import com.java6.asm.clothing_store.dto.request.UserRequest;
+import com.java6.asm.clothing_store.dto.response.UserResponse;
 import com.java6.asm.clothing_store.entity.User;
+import com.java6.asm.clothing_store.exception.AppException;
+import com.java6.asm.clothing_store.exception.ErrorCode;
 import com.java6.asm.clothing_store.repository.UserRepository;
 import com.java6.asm.clothing_store.service.UserService;
 import lombok.AllArgsConstructor;
@@ -25,12 +28,17 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final SystemUserMapper systemUserMapper;
+    private final UserResponseMapper userResponseMapper;
 
     @Transactional
     @Override
-    public SystemUserRegisterResponse createUser(UserRegisterRequest request) {
+    public UserResponse createUser(UserRegisterRequest request) {
 
+        UserResponse checkedUser = retrieveUserByEmail(request.getEmail());
+
+        if (checkedUser != null) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
         User newUser = User.builder()
                 .password(passwordEncoder.encode(request.getPassword()))
                 .email(request.getEmail())
@@ -40,11 +48,11 @@ public class UserServiceImpl implements UserService {
                 .type(TypeAccountEnum.SYSTEM)
                 .createdAt(LocalDate.now())
                 .build();
-        return systemUserMapper.toResponse(userRepository.save(newUser));
+        return userResponseMapper.toResponse(userRepository.save(newUser));
     }
 
     @Override
-    public SystemUserRegisterResponse updateUser(UserRegisterRequest userRegisterRequest, Integer id) {
+    public UserResponse updateUser(UserRequest request) {
         return null;
     }
 
@@ -54,12 +62,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<SystemUserRegisterResponse> retrieveAllUsers() {
+    public List<UserResponse> retrieveAllUsers() {
         return List.of();
     }
 
     @Override
-    public SystemUserRegisterResponse retrieveUserById(Integer userId) {
-        return null;
+    public UserResponse retrieveUserByEmail(String email) {
+        User user = userRepository.findByEmailAndStatus(email, StatusEnum.ACTIVE).orElse(null);
+        return userResponseMapper.toResponse(user);
     }
 }

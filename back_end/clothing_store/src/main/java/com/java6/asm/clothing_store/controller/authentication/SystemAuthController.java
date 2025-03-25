@@ -8,6 +8,7 @@ import com.java6.asm.clothing_store.exception.AppException;
 import com.java6.asm.clothing_store.exception.ErrorCode;
 import com.java6.asm.clothing_store.service.authentication.OAuthSystemUserService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

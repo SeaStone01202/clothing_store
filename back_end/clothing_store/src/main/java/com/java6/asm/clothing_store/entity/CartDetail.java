@@ -1,5 +1,6 @@
 package com.java6.asm.clothing_store.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,6 +25,7 @@ public class CartDetail {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
+    @JsonManagedReference
     private Cart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)

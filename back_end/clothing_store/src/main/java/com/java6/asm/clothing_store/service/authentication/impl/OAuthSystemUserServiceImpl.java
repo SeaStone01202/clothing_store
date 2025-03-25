@@ -1,5 +1,6 @@
 package com.java6.asm.clothing_store.service.authentication.impl;
 
+import com.java6.asm.clothing_store.constance.StatusEnum;
 import com.java6.asm.clothing_store.dto.mapper.UserResponseMapper;
 import com.java6.asm.clothing_store.dto.request.UserRequest;
 import com.java6.asm.clothing_store.dto.response.AuthResponse;
@@ -35,9 +36,7 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
     private final RefreshTokenService jwtRefreshTokenService;
 
     private final DeviceManagementService deviceManagementService;
-    /**
-     * ✅ Đăng nhập & tạo Access Token + Refresh Token
-     */
+
     @Override
     public AuthResponse authenticateAndGenerateTokens(UserRequest request, HttpServletResponse response) {
 
@@ -50,7 +49,7 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
         }
 
         UserResponse userChecked = userRepository
-                .findByEmail(request.getEmail())
+                .findByEmailAndStatus(request.getEmail(), StatusEnum.ACTIVE)
                 .filter(user -> passwordEncoder.matches(request.getPassword(), user.getPassword()))
                 .map(userResponseMapper::toResponse)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -70,9 +69,6 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
         return AuthResponse.builder().accessToken(accessToken).build();
     }
 
-    /**
-     * ✅ Làm mới Access Token từ Refresh Token
-     */
     @Override
     public AuthResponse refreshAccessToken(String refreshToken) {
 
@@ -82,16 +78,13 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
                 .orElseThrow(() -> new AppException(ErrorCode.REFRESH_TOKEN_INVALID));
 
 
-        String newAccessToken = userRepository.findByEmail(email)
+        String newAccessToken = userRepository.findByEmailAndStatus(email, StatusEnum.ACTIVE)
                 .map(user -> jwtAccessTokenService.generateToken(user.getEmail()))
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         return AuthResponse.builder().accessToken(newAccessToken).build();
     }
 
-    /**
-     * ✅ Đăng xuất
-     */
     @Override
     public String logout(String refreshToken, HttpServletResponse response) {
         boolean deleted = deviceManagementService.removeRefreshToken(refreshToken);
@@ -118,7 +111,7 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
             throw new AppException(ErrorCode.UNAUTHENTICATED_EXCEPTION);
         }
 
-        return userRepository.findByEmail(email)
+        return userRepository.findByEmailAndStatus(email, StatusEnum.ACTIVE)
                 .map(userResponseMapper::toResponse)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
@@ -126,9 +119,6 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
 
     // ===================== HÀM HỖ TRỢ =====================
 
-    /**
-     * ✅ Tạo Cookie chứa Refresh Token
-     */
     private Cookie createRefreshTokenCookie(String refreshToken) {
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
@@ -138,9 +128,6 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
         return cookie;
     }
 
-    /**
-     * ✅ Tạo Cookie rỗng để xóa Refresh Token
-     */
     private Cookie createExpiredRefreshTokenCookie() {
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setHttpOnly(true);

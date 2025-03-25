@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Setter
 @Getter
 @Builder
@@ -23,5 +25,15 @@ public class ApiResponse <T>{
     public static <T> ApiResponse<T> error(AppException appException) {
         return new ApiResponse<>(appException.getErrorCode().getCode(), appException.getErrorCode().getMessage(), null);
     }
+
+    // ✅ Thêm phương thức này để hỗ trợ danh sách lỗi validation
+    public static ApiResponse<List<String>> error(List<String> errorMessages) {
+        return new ApiResponse<>(400, "Validation Failed", errorMessages);
+    }
+
+    public static <T> ApiResponse<T> error(int status, String message, T data) {
+        return new ApiResponse<>(status, message, data);
+    }
+
 
 }
