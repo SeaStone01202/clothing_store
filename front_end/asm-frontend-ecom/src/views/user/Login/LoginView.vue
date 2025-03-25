@@ -29,7 +29,7 @@
 
         <!-- 🔥 Nút đăng nhập với Google & Zalo -->
         <div class="social-login mt-3">
-          <button @click="loginWithGoogle" class="btn btn-light border d-flex align-items-center w-100">
+          <button @click="loginWithGoogle" type="button" class="btn btn-light border d-flex align-items-center w-100">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/768px-Google_%22G%22_logo.svg.png" 
                  alt="Google" class="social-icon me-2" /> 
             Đăng nhập với Google
@@ -83,7 +83,8 @@ const handleLogin = async () => {
  * ✅ Chuyển hướng đến Google OAuth2
  */
 const loginWithGoogle = () => {
-  window.location.href = "http://localhost:8080/oauth2/authorization/google";
+  // window.location.href = "http://localhost:8080/oauth2/authorization/google";
+  var loginWindow = window.open('http://localhost:8080/oauth2/authorization/google', 'Google Login', 'width=500,height=600');
 };
 </script>
 
