@@ -7,6 +7,7 @@ import OrderHistoryView from '@/views/user/OrderHistory/OrderHistoryView.vue';
 import ProductDetail from '@/views/user/ProductDetail/ProductDetailView.vue';
 import EditProfileView from '@/views/user/ProfileUser/EditProfileView.vue';
 import RegisterView from '@/views/user/Register/RegisterView.vue';
+import CallbackView from '@/views/user/Login/CallbackView.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
 
@@ -20,6 +21,7 @@ const routes = [
   { path: '/edit-profile', component: EditProfileView },
   { path: '/order-history', component: OrderHistoryView },
   { path: '/admin', component: AdminView },
+  { path: '/callback', name: 'Callback', component: CallbackView },
   // { path: "/auth/zalo/callback", component: ZaloCallback }, // 🔥 Thêm route callback
 ];
 

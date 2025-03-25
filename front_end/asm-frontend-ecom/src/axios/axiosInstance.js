@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useAuthStore } from "@/stores/AuthStore";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8080",
@@ -6,13 +7,16 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // ✅ Để gửi Cookie chứa Refresh Token kèm request
+  withCredentials: true, // 🔥 Đảm bảo gửi cookie chứa Refresh Token
 });
 
-// ✅ Interceptor: Tự động thêm Access Token từ localStorage vào headers
+let isRefreshing = false; // 🔥 Kiểm soát trạng thái refresh token
+let failedQueue = []; // 🔥 Hàng đợi các request bị chặn khi refresh
+
+// ✅ Interceptor: Thêm Access Token vào headers trước khi gửi request
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken"); // 🔥 Lấy token từ localStorage
+    const token = localStorage.getItem("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -21,38 +25,43 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Interceptor: Xử lý lỗi 401 và refresh token tự động
+// ✅ Interceptor: Xử lý lỗi 401 và tự động refresh token
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response && error.response.status === 401) {
-      try {
-        // 🚀 Gửi request làm mới Access Token
-        const refreshResponse = await axios.post("http://localhost:8080/auth/system/refresh", {}, { withCredentials: true });
+    const authStore = useAuthStore();
+    const originalRequest = error.config;
 
-        if (refreshResponse.data.status === 200) {
-          const newAccessToken = refreshResponse.data.data.accessToken;
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      if (!isRefreshing) {
+        isRefreshing = true;
+        try {
+          await authStore.refreshAccessToken(); // ✅ Gọi API refresh token
+          isRefreshing = false;
 
-          // ✅ Cập nhật Access Token mới vào localStorage
-          localStorage.setItem("accessToken", newAccessToken);
+          // ✅ Retry lại tất cả các request bị chặn
+          failedQueue.forEach((req) => req.resolve(axiosInstance(req.config)));
+          failedQueue = [];
 
           // ✅ Gửi lại request ban đầu với token mới
-          error.config.headers.Authorization = `Bearer ${newAccessToken}`;
-          return axiosInstance(error.config);
+          originalRequest.headers.Authorization = `Bearer ${authStore.accessToken}`;
+          return axiosInstance(originalRequest);
+        } catch (refreshError) {
+          isRefreshing = false;
+          failedQueue.forEach((req) => req.reject(refreshError));
+          failedQueue = [];
+          authStore.logout(); // ❌ Nếu refresh token lỗi, logout user
+          return Promise.reject(refreshError);
         }
-      } catch (refreshError) {
-        logout(); // 🔴 Xóa token & chuyển hướng đến trang login nếu refresh thất bại
-        return Promise.reject(refreshError);
+      } else {
+        // Nếu đã có request đang refresh token, chờ nó hoàn thành
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject, config: originalRequest });
+        });
       }
     }
     return Promise.reject(error);
   }
 );
-
-// ✅ Hàm logout: Xóa token trong localStorage
-const logout = () => {
-  localStorage.removeItem("accessToken");
-  window.location.href = "/login"; // 🔥 Chuyển hướng về trang đăng nhập
-};
 
 export default axiosInstance;

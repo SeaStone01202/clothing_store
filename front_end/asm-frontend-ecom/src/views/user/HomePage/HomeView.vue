@@ -3,24 +3,79 @@
     <!-- Tiêu đề -->
     <h1 class="text-center text-primary fw-bold mb-4">🛍 Sản phẩm mới nhất</h1>
 
-    <!-- Bộ lọc thể loại -->
+    <!-- Thanh tìm kiếm -->
     <div class="mb-4 text-center">
+      <div class="input-group" style="max-width: 500px; margin: 0 auto;">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Tìm kiếm sản phẩm..."
+          v-model="searchKeyword"
+          @keyup.enter="searchProducts"
+        />
+        <button class="btn btn-primary" @click="searchProducts">
+          <i class="bi bi-search"></i> Tìm kiếm
+        </button>
+        <button v-if="productStore.searchKeyword" class="btn btn-outline-secondary" @click="clearSearch">
+          Xóa
+        </button>
+      </div>
+    </div>
+
+    <!-- Hiển thị trạng thái loading -->
+    <div v-if="productStore.loading" class="text-center mb-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Đang tải...</span>
+      </div>
+    </div>
+
+    <!-- Hiển thị lỗi nếu có -->
+    <div v-if="productStore.error" class="alert alert-danger text-center" role="alert">
+      {{ productStore.error }}
+    </div>
+
+    <!-- Bộ lọc -->
+    <div v-if="!productStore.loading" class="mb-4 text-center d-flex justify-content-center align-items-center flex-wrap">
+      <!-- Bộ lọc thể loại -->
       <button
-        v-for="category in categories"
+        v-for="category in productStore.categories"
         :key="category"
-        @click="selectedCategory = category"
-        class="btn me-2"
-        :class="selectedCategory === category ? 'btn-primary' : 'btn-outline-primary'"
+        @click="productStore.setSelectedCategory(category)"
+        class="btn me-2 mb-2"
+        :class="productStore.selectedCategory === category ? 'btn-primary' : 'btn-outline-primary'"
       >
         {{ category }}
       </button>
+
+      <!-- Dropdown lọc theo mệnh giá -->
+      <div class="dropdown me-2 mb-2">
+        <button
+          class="btn btn-outline-primary dropdown-toggle"
+          type="button"
+          id="priceRangeDropdown"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          Lọc theo giá: {{ productStore.selectedPriceRange }}
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="priceRangeDropdown">
+          <li v-for="priceRange in productStore.priceRanges" :key="priceRange">
+            <button
+              class="dropdown-item"
+              @click="productStore.setSelectedPriceRange(priceRange)"
+            >
+              {{ priceRange }}
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <!-- Danh sách sản phẩm -->
-    <div class="row">
-      <div class="col-md-4 mb-4" v-for="product in paginatedProducts" :key="product.id">
+    <div v-if="!productStore.loading && productStore.paginatedProducts.length" class="row">
+      <div class="col-md-4 mb-4" v-for="product in productStore.paginatedProducts" :key="product.id">
         <div class="card product-card">
-          <img :src="product.image" class="card-img-top" alt="Sản phẩm">
+          <img :src="product.image" class="card-img-top" alt="Sản phẩm" @error="handleImageError" />
           <div class="card-body text-center">
             <h5 class="card-title text-dark fw-bold">{{ product.name }}</h5>
             <p class="card-text text-primary fw-bold">{{ product.price.toLocaleString() }} VND</p>
@@ -30,17 +85,22 @@
       </div>
     </div>
 
+    <!-- Thông báo nếu không có sản phẩm -->
+    <div v-if="!productStore.loading && !productStore.paginatedProducts.length" class="text-center">
+      <p class="text-muted">Không có sản phẩm nào trong danh mục này.</p>
+    </div>
+
     <!-- Phân trang -->
-    <nav>
+    <nav v-if="!productStore.loading && productStore.paginatedProducts.length">
       <ul class="pagination justify-content-center mt-4">
-        <li class="page-item" :class="{ disabled: currentPage === 1 }">
-          <button class="page-link" @click="prevPage">Trước</button>
+        <li class="page-item" :class="{ disabled: productStore.currentPage === 1 }">
+          <button class="page-link" @click="productStore.setPage(productStore.currentPage - 1)">Trước</button>
         </li>
-        <li class="page-item" v-for="page in totalPages" :key="page" :class="{ active: currentPage === page }">
-          <button class="page-link" @click="currentPage = page">{{ page }}</button>
+        <li class="page-item" v-for="page in productStore.totalPages" :key="page" :class="{ active: productStore.currentPage === page }">
+          <button class="page-link" @click="productStore.setPage(page)">{{ page }}</button>
         </li>
-        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-          <button class="page-link" @click="nextPage">Sau</button>
+        <li class="page-item" :class="{ disabled: productStore.currentPage === productStore.totalPages }">
+          <button class="page-link" @click="productStore.setPage(productStore.currentPage + 1)">Sau</button>
         </li>
       </ul>
     </nav>
@@ -48,52 +108,27 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useProductStore } from '@/stores/ProductStore';
 
-// Danh sách sản phẩm (thay ảnh mẫu bằng ảnh thực tế)
-const products = ref([
-  { id: 1, name: 'Áo thun nam', price: 250000, image: 'https://i.imgur.com/ZC9d6sM.jpg', category: 'Áo' },
-  { id: 2, name: 'Quần jean nam', price: 500000, image: 'https://i.imgur.com/f5m5B29.jpg', category: 'Quần' },
-  { id: 3, name: 'Giày sneaker', price: 750000, image: 'https://i.imgur.com/aP4f5oX.jpg', category: 'Giày' },
-  { id: 4, name: 'Áo hoodie nữ', price: 300000, image: 'https://i.imgur.com/5s1bTj6.jpg', category: 'Áo' },
-  { id: 5, name: 'Túi xách nữ', price: 450000, image: 'https://i.imgur.com/6kG3NwO.jpg', category: 'Phụ kiện' },
-  { id: 6, name: 'Giày thể thao nữ', price: 700000, image: 'https://i.imgur.com/jtxEoPa.jpg', category: 'Giày' },
-  { id: 7, name: 'Quần short nam', price: 400000, image: 'https://i.imgur.com/3pK5F4p.jpg', category: 'Quần' },
-  { id: 8, name: 'Balo thời trang', price: 550000, image: 'https://i.imgur.com/vL6Cz0c.jpg', category: 'Phụ kiện' }
-]);
+const productStore = useProductStore();
+const searchKeyword = ref(''); // Từ khóa tìm kiếm
 
-// Thể loại sản phẩm
-const categories = ref(['Tất cả', 'Áo', 'Quần', 'Giày', 'Phụ kiện']);
-const selectedCategory = ref('Tất cả');
-
-// Phân trang
-const currentPage = ref(1);
-const itemsPerPage = 6;
-
-const filteredProducts = computed(() => {
-  if (selectedCategory.value === 'Tất cả') {
-    return products.value;
-  }
-  return products.value.filter(product => product.category === selectedCategory.value);
+onMounted(() => {
+  productStore.fetchProducts(productStore.currentPage);
 });
 
-const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage));
-
-const paginatedProducts = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  return filteredProducts.value.slice(start, start + itemsPerPage);
-});
-
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
+const searchProducts = () => {
+  productStore.setSearchKeyword(searchKeyword.value);
 };
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
+const clearSearch = () => {
+  searchKeyword.value = '';
+  productStore.clearSearch();
+};
+
+const handleImageError = (event) => {
+  event.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
 };
 </script>
 
@@ -106,8 +141,15 @@ const nextPage = () => {
 .product-card:hover {
   transform: scale(1.05);
 }
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+}
 .pagination .page-item.active .page-link {
   background-color: #007bff;
   border-color: #007bff;
+}
+.dropdown-menu {
+  min-width: 150px;
 }
 </style>
