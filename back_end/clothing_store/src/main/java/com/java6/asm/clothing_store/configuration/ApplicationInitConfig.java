@@ -63,6 +63,7 @@ public class ApplicationInitConfig {
         return User.builder()
                 .email(adminEmail)
                 .password(passwordEncoder.encode(adminPassword))
+                .image("https://th.bing.com/th/id/OIP.T3hXIZf46Yfv56sRAEtZHQHaJ4?rs=1&pid=ImgDetMain")
                 .role(RoleEnum.ADMIN)
                 .status(StatusEnum.ACTIVE)
                 .type(TypeAccountEnum.SYSTEM)

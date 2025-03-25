@@ -8,9 +8,9 @@ spring:
       com.java6.asm.clothing_store: DEBUG
 
   datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
+    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/clothingstore}
+    username: ${DATABASE_USERNAME:root}
+    password: ${DATABASE_PASSWORD:admin123}
 
   jpa:
     properties:
@@ -21,15 +21,18 @@ spring:
 
   data:
     redis:
+      url: ${REDIS_URL}
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
-      timeout: ${REDIS_TIMEOUT}
+      username: ${REDIS_USER:default} # Thêm username từ biến REDISUSER
+      password: ${REDIS_PASSWORD} # Thêm password từ biến REDISPASSWORD
+      timeout: ${REDIS_TIMEOUT:6000}
       lettuce:
         pool:
-          max-active: ${REDIS_POOL_MAX_ACTIVE}
-          max-idle: ${REDIS_POOL_MAX_IDLE}
-          min-idle: ${REDIS_POOL_MIN_IDLE}
-          max-wait: ${REDIS_POOL_MAX_WAIT}
+          max-active: ${REDIS_POOL_MAX_ACTIVE:10}
+          max-idle: ${REDIS_POOL_MAX_IDLE:5}
+          min-idle: ${REDIS_POOL_MIN_IDLE:2}
+          max-wait: ${REDIS_POOL_MAX_WAIT:2000}
 
   security:
     oauth2:
@@ -38,15 +41,15 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/auth/google/success}
+#            redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/auth/google/success}
 
 admin:
-  email: ${ADMIN_EMAIL}
-  password: ${ADMIN_PASSWORD}
+  email: ${ADMIN_EMAIL:admin@gmail.com}
+  password: ${ADMIN_PASSWORD:admin123}
 
 # Cấu hình CORS
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGIN_1}
+  allowed-origins: ${CORS_ALLOWED_ORIGIN_1:http://localhost:5173}
 
 # Cấu hình bổ sung để tăng bảo mật
 server:
