@@ -32,7 +32,7 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
 

@@ -19,6 +19,8 @@ public class UserResponse {
 
     private RoleEnum role;
 
+    private String phone;
+
     private TypeAccountEnum type;
 
 }

@@ -34,7 +34,7 @@ public class JwtAccessRefreshTokenService implements AccessTokenService {
                 JwtClaimsSet.builder()
                         .subject(username) // Ai đang đăng nhập?
                         .issuedAt(now) // Thời điểm tạo token
-                        .expiresAt(now.plus(1, ChronoUnit.MINUTES)) // Hết hạn sau 5 phút
+                        .expiresAt(now.plus(5, ChronoUnit.MINUTES)) // Hết hạn sau 5 phút
                         .claim("role", "ADMIN") // Gán quyền cho user
                         .build()
         )).getTokenValue();

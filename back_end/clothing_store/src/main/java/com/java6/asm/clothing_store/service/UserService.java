@@ -2,6 +2,7 @@ package com.java6.asm.clothing_store.service;
 
 import com.java6.asm.clothing_store.dto.request.UserRegisterRequest;
 import com.java6.asm.clothing_store.dto.request.UserRequest;
+import com.java6.asm.clothing_store.dto.request.UserUpdateRequest;
 import com.java6.asm.clothing_store.dto.response.SystemUserRegisterResponse;
 import com.java6.asm.clothing_store.dto.response.UserResponse;
 
@@ -11,7 +12,7 @@ public interface UserService {
 
     UserResponse createUser(UserRegisterRequest request);
 
-    UserResponse updateUser(UserRequest request);
+    UserResponse updateUser(UserUpdateRequest request);
 
     void deleteUser(Integer userId);
 
