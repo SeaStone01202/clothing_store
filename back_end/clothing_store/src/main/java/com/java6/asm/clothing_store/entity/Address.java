@@ -25,13 +25,13 @@ public class Address {
     private String addressLine;
 
     @Column(nullable = false, length = 100)
+    private String ward; // Thêm field phường/xã
+
+    @Column(nullable = false, length = 100)
     private String district;
 
     @Column(nullable = false, length = 100)
     private String city;
-
-    @Column(length = 20)
-    private String postalCode;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -59,5 +59,4 @@ public class Address {
     protected void onUpdate() {
         updatedAt = LocalDate.now();
     }
-
 }

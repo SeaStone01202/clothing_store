@@ -70,10 +70,10 @@ public class UserServiceImpl implements UserService {
 
         // Cập nhật thông tin từ request, chỉ thay đổi nếu có giá trị mới
         if (request.getFullname() != null && !request.getFullname().isEmpty()) {
-            user.setFullname(request.getFullname());
+            user.setFullname(request.getFullname().trim());
         }
         if (request.getPhone() != null && !request.getPhone().isEmpty()) {
-            user.setPhone(request.getPhone());
+            user.setPhone(request.getPhone().trim());
         }
 
         // Nếu có file ảnh trong request, upload lên Cloudinary

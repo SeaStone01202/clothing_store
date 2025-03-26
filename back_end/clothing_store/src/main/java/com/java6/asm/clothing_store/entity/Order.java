@@ -1,6 +1,6 @@
 package com.java6.asm.clothing_store.entity;
 
-import com.java6.asm.clothing_store.constance.StatusEnum;
+import com.java6.asm.clothing_store.constance.OrderStatusEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,7 +26,8 @@ public class Order {
     private Double totalPrice;
 
     @Enumerated(EnumType.STRING)
-    private StatusEnum status = StatusEnum.ACTIVE;
+    @Column(nullable = false)
+    private OrderStatusEnum status = OrderStatusEnum.reception; // Giá trị mặc định
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
