@@ -60,7 +60,6 @@
                   <button class="dropdown-item text-danger" @click="handleLogout">🚪 Đăng xuất</button>
                 </li>
               </template>
-              <button class="dropdown-item text-danger" @click="handleRefreshToken">🚪 Refresh token</button>
             </ul>
           </div>
         </div>
@@ -92,10 +91,6 @@ watchEffect(async () => {
     cartStore.cart = null; // Xóa giỏ hàng khi đăng xuất
   }
 });
-
-const handleRefreshToken = async () => {
-  await authStore.refreshAccessToken();
-};
 
 // Xử lý đăng xuất
 const handleLogout = async () => {

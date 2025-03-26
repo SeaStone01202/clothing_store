@@ -84,6 +84,8 @@ const handleLogin = async () => {
  */
 const loginWithGoogle = () => {
   // window.location.href = "http://localhost:8080/oauth2/authorization/google";
+  // https://clothingstoretest-production.up.railway.app/login/oauth2/code/google
+  // var loginWindow = window.open('https://clothingstoretest-production.up.railway.app/oauth2/authorization/google', 'Google Login', 'width=500,height=600');
   var loginWindow = window.open('http://localhost:8080/oauth2/authorization/google', 'Google Login', 'width=500,height=600');
 };
 </script>
