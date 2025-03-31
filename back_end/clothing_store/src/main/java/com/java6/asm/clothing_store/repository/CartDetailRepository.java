@@ -11,8 +11,11 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CartDetailRepository extends JpaRepository<CartDetail, Long> {
+public interface CartDetailRepository extends JpaRepository<CartDetail, Integer> {
 
     @Query("SELECT cd FROM CartDetail cd WHERE cd.cart = :cart AND cd.product = :product")
     Optional<CartDetail> findByCartAndProduct(@Param("cart") Cart cart, @Param("product") Product product);
+
+    Optional<CartDetail> deleteByCart(Cart cart);
+
 }

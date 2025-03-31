@@ -10,10 +10,10 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CartRepository extends JpaRepository<Cart, Long> {
+public interface CartRepository extends JpaRepository<Cart, Integer> {
 
     @Query("SELECT c FROM Cart c WHERE c.user.email = :email")
-    Cart findByUserMail(@Param("email") String email);
+    Optional<Cart> findByUserEmail(@Param("email") String email);
 
     @Query("SELECT c FROM Cart c " +
             "LEFT JOIN FETCH c.user " +

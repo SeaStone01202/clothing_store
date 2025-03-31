@@ -54,7 +54,7 @@ public class User {
     private LocalDate updatedAt;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonBackReference // Đánh dấu phía không được serialize
+    @JsonBackReference
     private Cart cart;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

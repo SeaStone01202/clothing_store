@@ -22,14 +22,14 @@ public class SystemAuthController {
     private final OAuthSystemUserService oAuthSystemUserService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody UserRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody UserRequest request, HttpServletResponse response) {
         return ResponseEntity.ok(ApiResponse.success(oAuthSystemUserService.authenticateAndGenerateTokens(request, response)));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
             @CookieValue(value = "refreshToken", required = false) String refreshToken) {
-        if (refreshToken == null) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error(new AppException(ErrorCode.REFRESH_TOKEN_INVALID)));
         }

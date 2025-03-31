@@ -4,13 +4,12 @@ import com.java6.asm.clothing_store.dto.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.nio.file.AccessDeniedException;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -38,23 +37,6 @@ public class GlobalExceptionHandler {
                 status(errorCode.getHttpStatus()).
                 body(apiResponse);
     }
-
-//    @ExceptionHandler(value = MethodArgumentNotValidException.class)
-//    ResponseEntity<ApiResponse> handlingMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
-//
-//        String enumKey = exception.getFieldError().getDefaultMessage();
-//        ErrorCode errorCode = ErrorCode.INVALID_KEY;
-//        try {
-//            errorCode = ErrorCode.valueOf(enumKey);
-//        } catch (IllegalArgumentException e) {
-//
-//        }
-//        ApiResponse apiResponse = ApiResponse.builder().
-//                status(errorCode.getCode()).
-//                message(errorCode.getMessage()).build();
-//
-//        return ResponseEntity.badRequest().body(apiResponse);
-//    }
 
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ApiResponse> handlingAccessDeniedException(AccessDeniedException exception) {
@@ -91,6 +73,4 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest().body(ApiResponse.error(400, "Dữ liệu không hợp lệ", errors));
     }
-
-
 }

@@ -2,7 +2,6 @@ package com.java6.asm.clothing_store.controller;
 
 import com.java6.asm.clothing_store.dto.ApiResponse;
 import com.java6.asm.clothing_store.dto.response.CartDetailResponse;
-import com.java6.asm.clothing_store.entity.CartDetail;
 import com.java6.asm.clothing_store.service.CartDetailService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,24 +16,24 @@ public class CartDetailController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<CartDetailResponse>> addProductToCart(
-            @RequestParam String email,
+            @RequestHeader( value = "Authorization", required = false) String authorizationHeader,
             @RequestParam Integer productId,
             @RequestParam Integer quantity) {
-        CartDetailResponse cartDetail = cartDetailService.addProductToCart(email, productId, quantity);
-        return ResponseEntity.ok(ApiResponse.success(cartDetail));
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        return ResponseEntity.ok(ApiResponse.success(cartDetailService.addProductToCart(accessToken, productId, quantity)));
     }
 
     @PutMapping("/{cartDetailId}")
     public ResponseEntity<ApiResponse<CartDetailResponse>> updateQuantity(
-            @PathVariable Long cartDetailId,
+            @RequestHeader( value = "Authorization", required = false) String authorizationHeader,
+            @PathVariable Integer cartDetailId,
             @RequestParam Integer quantity) {
-        CartDetailResponse response = cartDetailService.updateQuantity(cartDetailId, quantity);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        return ResponseEntity.ok(ApiResponse.success(cartDetailService.updateQuantity(accessToken, cartDetailId, quantity)));
     }
 
     @DeleteMapping("/{cartDetailId}")
-    public ResponseEntity<ApiResponse<Void>> deleteCartDetail(@PathVariable Long cartDetailId) {
-        cartDetailService.deleteCartDetail(cartDetailId);
-        return ResponseEntity.ok(ApiResponse.success(null));
+    public ResponseEntity<ApiResponse<Boolean>> deleteCartDetail(@PathVariable Integer cartDetailId) {
+        return ResponseEntity.ok(ApiResponse.success(cartDetailService.deleteCartDetail(cartDetailId)));
     }
 }

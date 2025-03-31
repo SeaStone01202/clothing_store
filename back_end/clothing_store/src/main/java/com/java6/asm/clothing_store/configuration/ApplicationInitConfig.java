@@ -5,7 +5,6 @@ import com.java6.asm.clothing_store.constance.StatusEnum;
 import com.java6.asm.clothing_store.constance.TypeAccountEnum;
 import com.java6.asm.clothing_store.entity.User;
 import com.java6.asm.clothing_store.repository.UserRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,9 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-/**
- * Configuration class to initialize the application with a default admin user.
- */
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
@@ -35,12 +31,6 @@ public class ApplicationInitConfig {
     @Value("${admin.password}")
     private String adminPassword;
 
-    /**
-     * Creates an ApplicationRunner to initialize the default admin user.
-     *
-     * @param userRepository The repository to interact with User entities
-     * @return ApplicationRunner to execute initialization logic
-     */
     @Bean
     ApplicationRunner applicationRunner() {
         log.info(INITIALIZING_MESSAGE);
@@ -54,17 +44,12 @@ public class ApplicationInitConfig {
         };
     }
 
-    /**
-     * Builds a default admin user with predefined properties.
-     *
-     * @return The admin User entity
-     */
     private User buildAdminUser() {
         return User.builder()
                 .email(adminEmail)
                 .password(passwordEncoder.encode(adminPassword))
                 .image("https://th.bing.com/th/id/OIP.T3hXIZf46Yfv56sRAEtZHQHaJ4?rs=1&pid=ImgDetMain")
-                .role(RoleEnum.ADMIN)
+                .role(RoleEnum.DIRECTOR)
                 .status(StatusEnum.ACTIVE)
                 .type(TypeAccountEnum.SYSTEM)
                 .build();

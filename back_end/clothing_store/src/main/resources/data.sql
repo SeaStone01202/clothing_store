@@ -37,3 +37,5 @@ INSERT INTO products (name, price, stock, description, image_url, category_id) V
                                                                                    ('Ví da nam cao cấp', 250000, 80, 'Ví da nam cao cấp, thiết kế sang trọng', 'https://th.bing.com/th?id=OIP.VhipPIP8Oqlcqksme0MMSAHaJQ&w=121&h=104&c=7&bgcl=fb282d&r=0&o=6&pid=13.1', 4),
                                                                                    ('Kính râm nam thời trang', 300000, 70, 'Kính râm nam, phong cách thời trang', 'https://th.bing.com/th?id=OIP.EJF7Td99l54XekCjUDHHcAHaI2&w=70&h=104&c=7&bgcl=a65d06&r=0&o=6&pid=13.1', 4),
                                                                                    ('Dây đồng hồ da', 150000, 100, 'Dây đồng hồ da, chất liệu bền bỉ', 'https://www.bing.com/th?id=OIP.jtpXeru_2cYb4Wo1vKgjPAHaHa&w=176&h=185&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2', 4);
+
+select * from products;

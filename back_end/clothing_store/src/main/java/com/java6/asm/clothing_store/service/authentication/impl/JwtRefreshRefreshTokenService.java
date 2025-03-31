@@ -21,7 +21,7 @@ public class JwtRefreshRefreshTokenService implements RefreshTokenService {
 
     @Override
     public String generateToken(String email, String deviceId) {
-        // 📌 Kiểm tra xem deviceId đã tồn tại chưa
+
         String redisKey = "refreshToken:" + email + ":" + deviceId;
 
         String existingToken = redisTemplate.opsForValue().get(redisKey);

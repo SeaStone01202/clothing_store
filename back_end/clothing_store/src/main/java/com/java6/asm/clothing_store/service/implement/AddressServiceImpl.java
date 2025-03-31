@@ -1,6 +1,7 @@
 package com.java6.asm.clothing_store.service.implement;
 
 import com.java6.asm.clothing_store.constance.StatusEnum;
+import com.java6.asm.clothing_store.dto.mapper.AddressResponseMapper;
 import com.java6.asm.clothing_store.dto.request.AddressRequest;
 import com.java6.asm.clothing_store.dto.response.AddressResponse;
 import com.java6.asm.clothing_store.entity.Address;
@@ -10,17 +11,24 @@ import com.java6.asm.clothing_store.exception.ErrorCode;
 import com.java6.asm.clothing_store.repository.AddressRepository;
 import com.java6.asm.clothing_store.repository.UserRepository;
 import com.java6.asm.clothing_store.service.AddressService;
+import com.java6.asm.clothing_store.service.authentication.AccessTokenService;
 import lombok.AllArgsConstructor;
-import org.apache.hc.core5.reactor.IOSession;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class AddressServiceImpl implements AddressService {
 
     private final AddressRepository addressRepository;
+
     private final UserRepository userRepository;
+
+    private final AddressResponseMapper addressResponseMapper;
+
+    private final AccessTokenService accessTokenService;
 
     @Transactional
     @Override
@@ -39,21 +47,21 @@ public class AddressServiceImpl implements AddressService {
 
         Address savedAddress = addressRepository.save(address);
 
-        AddressResponse response = getAddressResponse(savedAddress);
-
-        return response;
+        return addressResponseMapper.toDto(savedAddress);
     }
 
-    private static AddressResponse getAddressResponse(Address savedAddress) {
-        AddressResponse response = new AddressResponse();
-        response.setId(savedAddress.getId());
-        response.setAddressLine(savedAddress.getAddressLine());
-        response.setWard(savedAddress.getWard());
-        response.setDistrict(savedAddress.getDistrict());
-        response.setCity(savedAddress.getCity());
-        response.setStatus(savedAddress.getStatus());
-        response.setIsDefault(savedAddress.getIsDefault());
-        response.setEmail(savedAddress.getUser().getEmail()); // Trả về email
-        return response;
+    @Override
+    public List<AddressResponse> getAllAddresses(String accessToken) {
+
+        if (accessToken == null || accessToken.isBlank()) {
+            throw new AppException(ErrorCode.TOKEN_INVALID);
+        }
+
+        String email = accessTokenService.validateToken(accessToken);
+
+        return addressRepository.findAllByUserEmail(email)
+                .stream()
+                .map(addressResponseMapper::toDto)
+                .toList();
     }
 }

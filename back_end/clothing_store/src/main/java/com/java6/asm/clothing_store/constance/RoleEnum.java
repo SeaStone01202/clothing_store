@@ -1,7 +1,7 @@
 package com.java6.asm.clothing_store.constance;
 
 public enum RoleEnum {
-    ADMIN,
+    STAFF,
     CUSTOMER,
-    STAFF
+    DIRECTOR
 }

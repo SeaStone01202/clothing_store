@@ -1,5 +1,6 @@
 package com.java6.asm.clothing_store.service.authentication.impl;
 
+import com.java6.asm.clothing_store.constance.RoleEnum;
 import com.java6.asm.clothing_store.exception.AppException;
 import com.java6.asm.clothing_store.exception.ErrorCode;
 import com.java6.asm.clothing_store.service.authentication.AccessTokenService;
@@ -27,15 +28,16 @@ public class JwtAccessRefreshTokenService implements AccessTokenService {
      * @param username Tên user để gán vào JWT
      * @return Chuỗi Access Token đã ký
      */
-    public String generateToken(String username) {
+    @Override
+    public String generateToken(String email, RoleEnum role) {
         Instant now = Instant.now();
         return jwtEncoder.encode(JwtEncoderParameters.from(
                 JwsHeader.with(SignatureAlgorithm.RS256).build(),
                 JwtClaimsSet.builder()
-                        .subject(username) // Ai đang đăng nhập?
-                        .issuedAt(now) // Thời điểm tạo token
-                        .expiresAt(now.plus(5, ChronoUnit.MINUTES)) // Hết hạn sau 5 phút
-                        .claim("role", "ADMIN") // Gán quyền cho user
+                        .subject(email)
+                        .issuedAt(now)
+                        .expiresAt(now.plus(10, ChronoUnit.MINUTES))
+                        .claim("scope", role)
                         .build()
         )).getTokenValue();
     }
@@ -43,8 +45,8 @@ public class JwtAccessRefreshTokenService implements AccessTokenService {
     @Override
     public String validateToken(String token) {
         try {
-            Jwt decodedToken = jwtDecoder.decode(token); // 👈 Decode token để kiểm tra
-            return decodedToken.getSubject(); // Trả về username nếu token hợp lệ
+            Jwt decodedToken = jwtDecoder.decode(token);
+            return decodedToken.getSubject();
         } catch (JwtException e) {
             throw new AppException(ErrorCode.ACCESS_TOKEN_INVALID);
         }

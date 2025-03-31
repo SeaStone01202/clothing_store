@@ -10,6 +10,8 @@ import com.java6.asm.clothing_store.dto.response.AuthResponse;
 import com.java6.asm.clothing_store.dto.response.GoogleUserRegisterResponse;
 import com.java6.asm.clothing_store.dto.response.UserResponse;
 import com.java6.asm.clothing_store.entity.User;
+import com.java6.asm.clothing_store.exception.AppException;
+import com.java6.asm.clothing_store.exception.ErrorCode;
 import com.java6.asm.clothing_store.repository.UserRepository;
 import com.java6.asm.clothing_store.service.authentication.DeviceManagementService;
 import com.java6.asm.clothing_store.service.authentication.OAuthGoogleUserService;
@@ -37,11 +39,14 @@ public class OAuthGoogleUserServiceImpl implements OAuthGoogleUserService {
 
     @Override
     public AuthResponse authenticateAndGenerateTokens(OAuth2User oauth2User,String deviceId, HttpServletResponse response) {
+
         UserRequest request = changeUserByOAuth2User(oauth2User);
+
+        User user = userRepository.findByEmailAndStatus(request.getEmail(), StatusEnum.ACTIVE).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         String refreshToken = deviceManagementService.getOrGenerateRefreshToken(request.getEmail(), deviceId);
 
-        String accessToken = jwtAccessTokenService.generateToken(refreshToken);
+        String accessToken = jwtAccessTokenService.generateToken(refreshToken, user.getRole());
 
         Cookie refreshTokenCookie = createRefreshTokenCookie(refreshToken);
 

@@ -40,13 +40,9 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
     @Override
     public AuthResponse authenticateAndGenerateTokens(UserRequest request, HttpServletResponse response) {
 
-        if (request.getEmail().isEmpty()) {
-            throw new AppException(ErrorCode.EMAIL_INVALID);
-        }
-
-        if (request.getPassword().isEmpty()) {
-            throw new AppException(ErrorCode.PASSWORD_INVALID);
-        }
+//        UserResponse userAuthBlock = userRepository.findByEmailAndStatus(request.getEmail(), StatusEnum.INACTIVE)
+//                .map(userResponseMapper::toResponse)
+//                .orElseThrow(() -> new AppException(ErrorCode.USER_BlOCKED));
 
         UserResponse userChecked = userRepository
                 .findByEmailAndStatus(request.getEmail(), StatusEnum.ACTIVE)
@@ -60,7 +56,7 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
 
         String refreshToken = deviceManagementService.getOrGenerateRefreshToken(email, deviceId);
 
-        String accessToken = jwtAccessTokenService.generateToken(email);
+        String accessToken = jwtAccessTokenService.generateToken(email.trim(), userChecked.getRole());
 
         Cookie refreshTokenCookie = createRefreshTokenCookie(refreshToken);
 
@@ -79,7 +75,7 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
 
 
         String newAccessToken = userRepository.findByEmailAndStatus(email, StatusEnum.ACTIVE)
-                .map(user -> jwtAccessTokenService.generateToken(user.getEmail()))
+                .map(user -> jwtAccessTokenService.generateToken(user.getEmail(), user.getRole()))
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         return AuthResponse.builder().accessToken(newAccessToken).build();
@@ -87,8 +83,11 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
 
     @Override
     public String logout(String refreshToken, HttpServletResponse response) {
-        boolean deleted = deviceManagementService.removeRefreshToken(refreshToken);
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
+        }
 
+        boolean deleted = deviceManagementService.removeRefreshToken(refreshToken);
         if (deleted) {
             Cookie expiredCookie = createExpiredRefreshTokenCookie();
             response.addCookie(expiredCookie);
@@ -102,13 +101,12 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
     public UserResponse getUser(String accessToken) {
 
         if (accessToken == null || accessToken.isBlank()) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED_EXCEPTION);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
         String email = jwtAccessTokenService.validateToken(accessToken);
-
         if (email == null) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED_EXCEPTION);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
         return userRepository.findByEmailAndStatus(email, StatusEnum.ACTIVE)

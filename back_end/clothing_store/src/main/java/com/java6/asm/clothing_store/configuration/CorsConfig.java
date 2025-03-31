@@ -17,9 +17,8 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // Áp dụng cho tất cả API
+                registry.addMapping("/**")
                         .allowedOrigins(apiFrontend)
-//                        .allowedOrigins("http://localhost:5173", "http://192.168.1.4:5173/", "http://172.20.112.1:5173/", "http://172.28.0.1:5173/") // Cho phép frontend truy cập
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*")
                         .allowCredentials(true);

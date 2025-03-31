@@ -10,8 +10,8 @@ public class DotenvConfig {
     @Bean
     public Dotenv dotenv() {
         return Dotenv.configure()
-                .filename("key.env") // Chỉ định tên file là key.env
-                .directory("./") // Đường dẫn đến file (thư mục gốc của project)
+                .filename("key.env")
+                .directory("./")
                 .load();
     }
 }

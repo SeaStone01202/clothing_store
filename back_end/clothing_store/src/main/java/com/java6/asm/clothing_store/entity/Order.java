@@ -1,6 +1,8 @@
 package com.java6.asm.clothing_store.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.java6.asm.clothing_store.constance.OrderStatusEnum;
+import com.java6.asm.clothing_store.constance.PaymentMethodEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,11 +35,16 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentMethodEnum paymentMethod;
+
+    @ManyToOne
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<OrderDetail> orderDetails;
 
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -9,27 +9,27 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@Order(1) // 🔥 Ưu tiên chạy trước `SecurityConfig`
-public class RefreshSecurityConfig {
+@Order(1)
+public class PublicSecurityConfig {
 
-    private String[] urls = {
+    private String[] publicUrls = {
             "/auth/system/refresh",
-            "/user/login",
-            "/user/logout",
+            "/auth/system/login",
             "/user/register",
             "/product/list",
             "/product/**",
-            "/product"
+            "/category/**",
+            "/swagger-ui/**",
+            "/v3/api-docs/**"
     };
 
     @Bean
     public SecurityFilterChain refreshSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher(urls) // ✅ Chỉ áp dụng cho `/auth/system/refresh`
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()) // 🚀 Bỏ qua xác thực
+                .securityMatcher(publicUrls)
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults());
-
         return http.build();
     }
 }

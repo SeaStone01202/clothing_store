@@ -1,13 +1,12 @@
 package com.java6.asm.clothing_store.service;
 
 import com.java6.asm.clothing_store.dto.response.CartDetailResponse;
-import com.java6.asm.clothing_store.entity.CartDetail;
 
 public interface CartDetailService {
 
-    CartDetailResponse addProductToCart(String email, Integer productId, Integer quantity);
+    CartDetailResponse addProductToCart(String accessToken, Integer productId, Integer quantity);
 
-    void deleteCartDetail(Long cartDetailId);
+    CartDetailResponse updateQuantity(String accessToken, Integer cartDetailId, Integer quantity);
 
-    CartDetailResponse updateQuantity(Long cartDetailId, Integer quantity);
+    boolean deleteCartDetail(Integer cartDetailId);
 }

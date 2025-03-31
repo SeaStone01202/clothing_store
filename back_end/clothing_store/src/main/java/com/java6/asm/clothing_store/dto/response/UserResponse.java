@@ -1,6 +1,7 @@
 package com.java6.asm.clothing_store.dto.response;
 
 import com.java6.asm.clothing_store.constance.RoleEnum;
+import com.java6.asm.clothing_store.constance.StatusEnum;
 import com.java6.asm.clothing_store.constance.TypeAccountEnum;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,5 +23,7 @@ public class UserResponse {
     private String phone;
 
     private TypeAccountEnum type;
+
+    private StatusEnum status;
 
 }

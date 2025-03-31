@@ -7,9 +7,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AddressResponse {
+
     private Integer id;
     private String addressLine;
-    private String ward; // Thêm ward
+    private String ward;
     private String district;
     private String city;
     private StatusEnum status;

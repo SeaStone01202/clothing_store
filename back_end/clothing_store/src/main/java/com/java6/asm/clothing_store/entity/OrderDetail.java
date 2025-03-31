@@ -1,5 +1,6 @@
 package com.java6.asm.clothing_store.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class OrderDetail {
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
+    @JsonManagedReference
     private Order order;
 
     @ManyToOne

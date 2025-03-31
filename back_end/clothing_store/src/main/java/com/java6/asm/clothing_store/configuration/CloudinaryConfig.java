@@ -13,7 +13,6 @@ public class CloudinaryConfig {
     @Value("${cloudinary.url}")
     private String cloudinary_url;
 
-
     @Bean
     public Cloudinary cloudinary() {
         Cloudinary cloudinary = new Cloudinary(cloudinary_url);
