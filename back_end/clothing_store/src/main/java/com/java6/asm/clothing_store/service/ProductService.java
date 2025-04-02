@@ -31,4 +31,6 @@ public interface ProductService {
     ProductResponse findById(Integer id);
 
     Page<ProductResponse> findRelatedProducts(String categoryName, Integer excludeId, int page);
+
+    Integer countProductsStock();
 }

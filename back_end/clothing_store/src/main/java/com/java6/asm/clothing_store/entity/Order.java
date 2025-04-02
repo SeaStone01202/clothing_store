@@ -29,7 +29,7 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private OrderStatusEnum status = OrderStatusEnum.reception; // Giá trị mặc định
+    private OrderStatusEnum status = OrderStatusEnum.reception;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

@@ -7,21 +7,21 @@ import com.java6.asm.clothing_store.entity.Product;
 import com.java6.asm.clothing_store.repository.ProductRepository;
 import com.java6.asm.clothing_store.service.ProductService;
 import com.java6.asm.clothing_store.utils.PageUtil;
-import lombok.AllArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
-    private ProductMapper productMapper;
+    private final ProductMapper productMapper;
 
-    private PageUtil pageUtil;
+    private final PageUtil pageUtil;
 
 
     @Override
@@ -44,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
         return null;
     }
 
-    @Cacheable(value = "products", key = "'all:page:' + #page")
+//    @Cacheable(value = "products", key = "'all:page:' + #page")
     @Override
     public Page<ProductResponse> findAll(int page) {
         Pageable pageable = pageUtil.createPageable(page);
@@ -87,6 +87,12 @@ public class ProductServiceImpl implements ProductService {
         Pageable pageable = pageUtil.createPageable(page);
         return productRepository.findRelatedProducts(categoryName, excludeId, pageable)
                 .map(productMapper::toResponse);
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('STAFF', 'DIRECTOR')")
+    public Integer countProductsStock() {
+        return productRepository.countAllProducts();
     }
 
 }

@@ -2,10 +2,11 @@ package com.java6.asm.clothing_store.controller;
 
 import com.java6.asm.clothing_store.dto.ApiResponse;
 import com.java6.asm.clothing_store.dto.request.OrderRequest;
+import com.java6.asm.clothing_store.dto.request.OrderStatusRequest;
 import com.java6.asm.clothing_store.dto.response.OrderResponse;
-import com.java6.asm.clothing_store.entity.Order;
 import com.java6.asm.clothing_store.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,5 +32,30 @@ public class OrderController {
             @RequestHeader( value = "Authorization", required = false) String authorizationHeader) {
         String accessToken = authorizationHeader.replace("Bearer ", "");
         return ResponseEntity.ok(ApiResponse.success(orderService.getOrdersByEmail(accessToken)));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<Page<OrderResponse>>> getAllOrders (int page) {
+        return ResponseEntity.ok(ApiResponse.success(orderService.retrieveAllOrder(page)));
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrders (String email) {
+        return ResponseEntity.ok(ApiResponse.success(orderService.getOrdersByEmail(email)));
+    }
+
+    @PutMapping("/edit")
+    public ResponseEntity<ApiResponse<Boolean>> changeStatus (@RequestBody OrderStatusRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(orderService.updateOrder(request.getOrderId(), request.getStatus())));
+    }
+
+    @GetMapping("/countOrder")
+    public ResponseEntity<ApiResponse<Integer>> countOrder () {
+        return ResponseEntity.ok(ApiResponse.success(orderService.countOrder()));
+    }
+
+    @GetMapping("/countPrice")
+    public ResponseEntity<ApiResponse<Double>> countOrderPrice () {
+        return ResponseEntity.ok(ApiResponse.success(orderService.countOrderPrice()));
     }
 }

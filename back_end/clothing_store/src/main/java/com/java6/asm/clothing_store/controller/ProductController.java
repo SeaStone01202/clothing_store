@@ -5,17 +5,17 @@ import com.java6.asm.clothing_store.dto.response.ProductResponse;
 import com.java6.asm.clothing_store.exception.AppException;
 import com.java6.asm.clothing_store.exception.ErrorCode;
 import com.java6.asm.clothing_store.service.ProductService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/product")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProductController {
 
-    private ProductService productService;
+    private final ProductService productService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ProductResponse>>> retrieveAllProducts(@RequestParam int page) {
@@ -63,5 +63,10 @@ public class ProductController {
             @RequestParam String category,
             @RequestParam int page) {
         return ResponseEntity.ok(ApiResponse.success(productService.findRelatedProducts(category, id, page)));
+    }
+
+    @GetMapping("/countStock")
+    public ResponseEntity<ApiResponse<Integer>> countProductsStock() {
+        return ResponseEntity.ok(ApiResponse.success(productService.countProductsStock()));
     }
 }

@@ -8,25 +8,49 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 @Configuration
 @Order(1)
 public class PublicSecurityConfig {
 
-    private String[] publicUrls = {
+    // Nhóm endpoint public cho ProductController
+    private static final String[] productUrls = {
+            "/product/list",
+            "/product/category/**"
+    };
+
+    // Nhóm endpoint public cho CategoryController
+    private static final String[] categoryUrls = {
+            "/category"
+    };
+
+    // Nhóm endpoint public cho OrderController (nếu có)
+    private static final String[] orderUrls = {
+            // Ví dụ: "/orders/public/list"
+    };
+
+    // Nhóm endpoint public chung (auth, swagger, ...)
+    private static final String[] commonUrls = {
             "/auth/system/refresh",
             "/auth/system/login",
             "/user/register",
-            "/product/list",
-            "/product/**",
-            "/category/**",
             "/swagger-ui/**",
             "/v3/api-docs/**"
     };
 
+    // Gộp tất cả thành publicUrls
+    private String[] getPublicUrls() {
+        return Stream.of(commonUrls, productUrls, categoryUrls, orderUrls)
+                .flatMap(Arrays::stream)
+                .toArray(String[]::new);
+    }
+
     @Bean
     public SecurityFilterChain refreshSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher(publicUrls)
+                .securityMatcher(getPublicUrls())
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults());

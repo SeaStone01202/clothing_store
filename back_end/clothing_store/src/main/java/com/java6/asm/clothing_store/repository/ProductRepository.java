@@ -45,4 +45,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             @Param("categoryName") String categoryName,
             @Param("excludeId") Integer excludeId,
             Pageable pageable);
+
+    @Query(value = "SELECT SUM(stock) FROM products", nativeQuery = true)
+    Integer countAllProducts();
 }

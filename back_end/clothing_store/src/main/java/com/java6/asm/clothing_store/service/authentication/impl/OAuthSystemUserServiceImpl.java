@@ -40,10 +40,6 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
     @Override
     public AuthResponse authenticateAndGenerateTokens(UserRequest request, HttpServletResponse response) {
 
-//        UserResponse userAuthBlock = userRepository.findByEmailAndStatus(request.getEmail(), StatusEnum.INACTIVE)
-//                .map(userResponseMapper::toResponse)
-//                .orElseThrow(() -> new AppException(ErrorCode.USER_BlOCKED));
-
         UserResponse userChecked = userRepository
                 .findByEmailAndStatus(request.getEmail(), StatusEnum.ACTIVE)
                 .filter(user -> passwordEncoder.matches(request.getPassword(), user.getPassword()))

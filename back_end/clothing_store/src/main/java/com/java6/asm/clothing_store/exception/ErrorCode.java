@@ -77,7 +77,9 @@ public enum ErrorCode {
     // 🔥 Lỗi System (1200-1299)
     INVALID_KEY(1201, "Khóa không hợp lệ!", HttpStatus.BAD_REQUEST),
     RESPONSE_NOT_FOUND(1202, "Không tìm thấy phản hồi!", HttpStatus.NOT_FOUND),
-    UNCATEGORIZED_EXCEPTION(1299, "Lỗi không xác định!", HttpStatus.INTERNAL_SERVER_ERROR);
+    UNCATEGORIZED_EXCEPTION(1299, "Lỗi không xác định!", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    CATEGORY_NOT_FOUND(1301, "Không tìm thấy thể loại", HttpStatus.NOT_FOUND);
 
     private final int code;
     private final String message;

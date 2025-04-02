@@ -13,7 +13,11 @@ import com.java6.asm.clothing_store.exception.ErrorCode;
 import com.java6.asm.clothing_store.repository.*;
 import com.java6.asm.clothing_store.service.OrderService;
 import com.java6.asm.clothing_store.service.authentication.AccessTokenService;
+import com.java6.asm.clothing_store.utils.PageUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +43,11 @@ public class OrderServiceImpl implements OrderService {
     private final AccessTokenService accessTokenService;
 
     private final OrderResponseMapper orderResponseMapper;
+
+    private final PageUtil pageUtil;
+
+
+//    private fina
 
     // Name, Phone, Address, Type Payment
     // Name: It's name contact or if customer wouldn't deliver know name
@@ -84,7 +93,35 @@ public class OrderServiceImpl implements OrderService {
         return orderResponseMapper.toOrderResponse(orders);
     }
 
-// ------ METHOD HELPER
+    @PreAuthorize("hasAnyRole('STAFF', 'DIRECTOR')")
+    @Override
+    public Page<OrderResponse> retrieveAllOrder(int page) {
+        Pageable pageable = pageUtil.createPageable(page);
+        return orderRepository.findAll(pageable).map(orderResponseMapper::toOrderResponse);
+    }
+
+    @PreAuthorize("hasAnyRole('STAFF', 'DIRECTOR')")
+    @Override
+    public boolean updateOrder(Integer orderId, OrderStatusEnum status) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        order.setStatus(status);
+        orderRepository.save(order);
+        return true;
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('STAFF', 'DIRECTOR')")
+    public Integer countOrder() {
+        return orderRepository.countTotalOrder();
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('STAFF', 'DIRECTOR')")
+    public Double countOrderPrice() {
+        return orderRepository.calculateRevenue();
+    }
+
+    // ------ METHOD HELPER
     private Order buildOrder(User user, Address address, OrderRequest request) {
         Order order = new Order();
         order.setUser(user);
