@@ -112,10 +112,11 @@ import { onMounted, ref } from 'vue';
 import { useProductStore } from '@/stores/ProductStore';
 
 const productStore = useProductStore();
-const searchKeyword = ref(''); // Từ khóa tìm kiếm
+const searchKeyword = ref('');
 
-onMounted(() => {
-  productStore.fetchProducts(productStore.currentPage);
+onMounted(async () => {
+  await productStore.fetchCategories(); // Lấy danh mục trước
+  productStore.fetchProducts(productStore.currentPage); // Sau đó lấy sản phẩm
 });
 
 const searchProducts = () => {

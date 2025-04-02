@@ -1,3 +1,4 @@
+<!-- src/views/user/EditProfileView.vue -->
 <template>
   <div class="container mt-5">
     <h1 class="text-center text-primary fw-bold mb-4">✍️ Quản lý hồ sơ</h1>
@@ -20,15 +21,15 @@
       <li class="nav-item" role="presentation">
         <button
           class="nav-link"
-          id="address-tab"
+          id="address-info-tab"
           data-bs-toggle="tab"
-          data-bs-target="#address"
+          data-bs-target="#address-info"
           type="button"
           role="tab"
-          aria-controls="address"
+          aria-controls="address-info"
           aria-selected="false"
         >
-          Thêm địa chỉ
+          Thông tin địa chỉ
         </button>
       </li>
     </ul>
@@ -92,100 +93,136 @@
                 style="max-width: 200px;"
               />
             </div>
+            <div v-if="errorMessage" class="alert alert-danger py-2 text-center">
+              {{ errorMessage }}
+            </div>
             <button
               type="submit"
               class="btn btn-primary w-100"
               :disabled="isProfileLoading"
             >
+              <span v-if="isProfileLoading" class="spinner-border spinner-border-sm me-2"></span>
               {{ isProfileLoading ? "Đang lưu..." : "💾 Lưu thay đổi" }}
             </button>
           </form>
         </div>
       </div>
 
-      <!-- Tab thêm địa chỉ -->
+      <!-- Tab thông tin địa chỉ -->
       <div
         class="tab-pane fade"
-        id="address"
+        id="address-info"
         role="tabpanel"
-        aria-labelledby="address-tab"
+        aria-labelledby="address-info-tab"
       >
         <div class="card p-4">
-          <h3 class="mb-3">Thêm địa chỉ mới</h3>
-          <form @submit.prevent="saveAddress">
-            <div class="mb-3">
-              <label for="city" class="form-label">Thành phố</label>
-              <select
-                class="form-select"
-                id="city"
-                v-model="address.city"
-                @change="updateDistricts"
-                required
+          <h3 class="mb-3">Thông tin địa chỉ</h3>
+
+          <!-- Phần danh sách địa chỉ -->
+          <div class="mb-5">
+            <h4 class="mb-3">Danh sách địa chỉ hiện có</h4>
+            <div v-if="errorMessage" class="alert alert-danger py-2 text-center">
+              {{ errorMessage }}
+            </div>
+            <div v-if="isAddressListLoading" class="text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+              </div>
+            </div>
+            <div v-else-if="addresses.length === 0" class="text-center">
+              <p>Chưa có địa chỉ nào.</p>
+            </div>
+            <div v-else class="list-group">
+              <div v-for="addr in addresses" :key="addr.id" class="list-group-item mb-2">
+                <p><strong>Địa chỉ:</strong> {{ addr.addressLine }}, {{ addr.ward }}, {{ addr.district }}, {{ addr.city }}</p>
+                <p><strong>Mặc định:</strong> {{ addr.isDefault ? "Có" : "Không" }}</p>
+                <p><strong>Trạng thái:</strong> {{ addr.status }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phần thêm địa chỉ mới -->
+          <div>
+            <h4 class="mb-3">Thêm địa chỉ mới</h4>
+            <form @submit.prevent="saveAddress">
+              <div class="mb-3">
+                <label for="city" class="form-label">Thành phố</label>
+                <select
+                  class="form-select"
+                  id="city"
+                  v-model="address.city"
+                  @change="updateDistricts"
+                  required
+                >
+                  <option value="" disabled>Chọn thành phố</option>
+                  <option v-for="province in provinces" :key="province.Code" :value="province.Name">
+                    {{ province.Name }}
+                  </option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="district" class="form-label">Quận/Huyện</label>
+                <select
+                  class="form-select"
+                  id="district"
+                  v-model="address.district"
+                  @change="updateWards"
+                  required
+                  :disabled="!address.city"
+                >
+                  <option value="" disabled>Chọn quận/huyện</option>
+                  <option v-for="district in filteredDistricts" :key="district.Code" :value="district.Name">
+                    {{ district.Name }}
+                  </option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="ward" class="form-label">Phường/Xã</label>
+                <select
+                  class="form-select"
+                  id="ward"
+                  v-model="address.ward"
+                  required
+                  :disabled="!address.district"
+                >
+                  <option value="" disabled>Chọn phường/xã</option>
+                  <option v-for="ward in filteredWards" :key="ward.Code" :value="ward.Name">
+                    {{ ward.Name }}
+                  </option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="addressLine" class="form-label">Địa chỉ chi tiết</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="addressLine"
+                  v-model="address.addressLine"
+                  required
+                />
+              </div>
+              <div class="mb-3 form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="isDefault"
+                  v-model="address.isDefault"
+                />
+                <label class="form-check-label" for="isDefault">Đặt làm địa chỉ mặc định</label>
+              </div>
+              <div v-if="errorMessage" class="alert alert-danger py-2 text-center">
+                {{ errorMessage }}
+              </div>
+              <button
+                type="submit"
+                class="btn btn-primary w-100"
+                :disabled="isAddressLoading"
               >
-                <option value="" disabled>Chọn thành phố</option>
-                <option v-for="province in provinces" :key="province.Code" :value="province.Name">
-                  {{ province.Name }}
-                </option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="district" class="form-label">Quận/Huyện</label>
-              <select
-                class="form-select"
-                id="district"
-                v-model="address.district"
-                @change="updateWards"
-                required
-                :disabled="!address.city"
-              >
-                <option value="" disabled>Chọn quận/huyện</option>
-                <option v-for="district in filteredDistricts" :key="district.Code" :value="district.Name">
-                  {{ district.Name }}
-                </option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="ward" class="form-label">Phường/Xã</label>
-              <select
-                class="form-select"
-                id="ward"
-                v-model="address.ward"
-                required
-                :disabled="!address.district"
-              >
-                <option value="" disabled>Chọn phường/xã</option>
-                <option v-for="ward in filteredWards" :key="ward.Code" :value="ward.Name">
-                  {{ ward.Name }}
-                </option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="addressLine" class="form-label">Địa chỉ chi tiết</label>
-              <input
-                type="text"
-                class="form-control"
-                id="addressLine"
-                v-model="address.addressLine"
-                required
-              />
-            </div>
-            <div class="mb-3 form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="isDefault"
-                v-model="address.isDefault"
-              />
-              <label class="form-check-label" for="isDefault">Đặt làm địa chỉ mặc định</label>
-            </div>
-            <button
-              type="submit"
-              class="btn btn-primary w-100"
-              :disabled="isAddressLoading"
-            >
-              {{ isAddressLoading ? "Đang lưu..." : "💾 Lưu địa chỉ" }}
-            </button>
-          </form>
+                <span v-if="isAddressLoading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ isAddressLoading ? "Đang lưu..." : "💾 Lưu địa chỉ" }}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -217,8 +254,11 @@ const address = ref({
   isDefault: false,
 });
 
+const addresses = ref([]);
+const errorMessage = ref("");
 const isProfileLoading = ref(false);
 const isAddressLoading = ref(false);
+const isAddressListLoading = ref(false);
 
 const provinces = ref(vietnamAddress);
 
@@ -258,9 +298,16 @@ onMounted(async () => {
       image: null,
       imageUrl: user.image || "",
     };
-    userStore.setUser(user); // Đồng bộ với UserStore
+    userStore.setUser(user);
+
+    // Lấy danh sách địa chỉ
+    isAddressListLoading.value = true;
+    await userStore.fetchAddresses(user.email);
+    addresses.value = userStore.getAddresses;
+    errorMessage.value = userStore.error || "";
+    isAddressListLoading.value = false;
   } else {
-    console.error("Không tìm thấy thông tin người dùng!");
+    errorMessage.value = "Không tìm thấy thông tin người dùng!";
   }
 });
 
@@ -274,6 +321,7 @@ const onFileChange = (event) => {
 
 const saveProfile = async () => {
   isProfileLoading.value = true;
+  errorMessage.value = "";
   try {
     const result = await userStore.updateUser({
       email: profile.value.email,
@@ -283,13 +331,12 @@ const saveProfile = async () => {
     });
     if (result.success) {
       alert(result.message);
-      profile.value.imageUrl = userStore.getUser.image;
-      authStore.user = userStore.getUser;
+      profile.value.imageUrl = userStore.getUser?.image || profile.value.imageUrl;
     } else {
-      alert(result.message);
+      errorMessage.value = result.message;
     }
   } catch (error) {
-    alert("Có lỗi xảy ra khi cập nhật hồ sơ!");
+    errorMessage.value = "Có lỗi xảy ra khi cập nhật hồ sơ!";
   } finally {
     isProfileLoading.value = false;
   }
@@ -297,6 +344,7 @@ const saveProfile = async () => {
 
 const saveAddress = async () => {
   isAddressLoading.value = true;
+  errorMessage.value = "";
   try {
     const result = await userStore.addAddress({
       addressLine: address.value.addressLine,
@@ -304,16 +352,20 @@ const saveAddress = async () => {
       district: address.value.district,
       city: address.value.city,
       isDefault: address.value.isDefault,
-      
     });
     if (result.success) {
       alert(result.message);
       address.value = { addressLine: "", ward: "", district: "", city: "", isDefault: false };
+      // Làm mới danh sách địa chỉ
+      isAddressListLoading.value = true;
+      await userStore.fetchAddresses(profile.value.email);
+      addresses.value = userStore.getAddresses;
+      isAddressListLoading.value = false;
     } else {
-      alert(result.message);
+      errorMessage.value = result.message;
     }
   } catch (error) {
-    alert("Có lỗi xảy ra khi thêm địa chỉ!");
+    errorMessage.value = "Có lỗi xảy ra khi thêm địa chỉ!";
   } finally {
     isAddressLoading.value = false;
   }
@@ -321,5 +373,18 @@ const saveAddress = async () => {
 </script>
 
 <style scoped>
-/* Không cần CSS tùy chỉnh vì đã dùng Bootstrap */
+.card {
+  max-width: 800px;
+  margin: 0 auto;
+  border-top: 4px solid #007bff;
+}
+.list-group-item {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+}
+h4 {
+  color: #007bff;
+  font-weight: 600;
+}
 </style>

@@ -4,7 +4,7 @@ import axiosInstance from '@/axios/axiosInstance';
 export const useProductStore = defineStore('product', {
   state: () => ({
     products: [],
-    categories: ['Tất cả', 'Áo', 'Quần', 'Giày', 'Phụ Kiện'],
+    categories: [], // Thay vì hardcode, sẽ lấy từ API
     selectedCategory: 'Tất cả',
     selectedPriceRange: 'Tất cả',
     priceRanges: ['Tất cả', 'Dưới 200k', 'Dưới 400k', 'Dưới 600k', 'Dưới 1000k'],
@@ -21,6 +21,29 @@ export const useProductStore = defineStore('product', {
   }),
 
   actions: {
+    // Thêm action để lấy danh sách danh mục
+    async fetchCategories() {
+      this.loading = true;
+      this.error = null;
+      try {
+        const response = await axiosInstance.get('/category/status');
+        if (response.data.status === 200) {
+          // Lấy danh sách danh mục từ API và thêm "Tất cả" vào đầu
+          this.categories = ['Tất cả', ...response.data.data.map(cat => cat.name)];
+          console.log('Fetched categories:', this.categories);
+        } else {
+          throw new Error(response.data.message);
+        }
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Lỗi khi tải danh sách danh mục';
+        console.error('Error fetching categories:', error);
+        // Fallback về danh sách hardcode nếu lỗi
+        this.categories = ['Tất cả', 'Áo', 'Quần', 'Giày', 'Phụ Kiện'];
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async fetchProducts(page = 1) {
       this.loading = true;
       this.error = null;
@@ -71,7 +94,7 @@ export const useProductStore = defineStore('product', {
             id: product.id,
             name: product.name,
             price: parseFloat(product.price),
-            image: product.imageUrl, // Đảm bảo ánh xạ đúng
+            image: product.imageUrl,
             category: product.category,
             description: product.description,
             stock: product.stock,
@@ -99,7 +122,7 @@ export const useProductStore = defineStore('product', {
             id: response.data.data.id,
             name: response.data.data.name,
             price: parseFloat(response.data.data.price),
-            image: response.data.data.imageUrl, // Đảm bảo ánh xạ đúng
+            image: response.data.data.imageUrl,
             category: response.data.data.category,
             description: response.data.data.description,
             stock: response.data.data.stock,
@@ -128,7 +151,7 @@ export const useProductStore = defineStore('product', {
             id: product.id,
             name: product.name,
             price: parseFloat(product.price),
-            image: product.imageUrl, // Đảm bảo ánh xạ đúng
+            image: product.imageUrl,
             category: product.category,
             description: product.description,
             stock: product.stock,

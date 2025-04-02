@@ -52,8 +52,12 @@
                 <li class="dropdown-item">👋 Xin chào: {{ userInfo.email || "Người dùng" }}</li>
                 <li><router-link class="dropdown-item" to="/edit-profile">✏️ Chỉnh sửa hồ sơ</router-link></li>
                 <li><router-link class="dropdown-item" to="/order-history">📜 Lịch sử mua hàng</router-link></li>
-                <li v-if="userInfo.role === 'ADMIN'">
-                  <router-link class="dropdown-item" to="/admin">⚙️ Quản trị viên</router-link>
+                <li v-if="userInfo.role === 'DIRECTOR', 'STAFF' ">
+                  <router-link class="dropdown-item" to="/AdminDashboard">⚙️ Admin Dashboard</router-link>
+                  <router-link class="dropdown-item" to="/AdminOrderView">⚙️ Admin Order View</router-link>
+                  <router-link class="dropdown-item" to="/AdminProductView">⚙️ Admin Product View</router-link>
+                  <router-link class="dropdown-item" to="/AdminUserView">⚙️ Admin User View</router-link>
+                  <router-link class="dropdown-item" to="/AdminCategoryView">⚙️ Admin Category View</router-link>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
@@ -78,30 +82,28 @@ const authStore = useAuthStore();
 const cartStore = useCartStore();
 const router = useRouter();
 
-// Kiểm tra đăng nhập
 const isAuthenticated = computed(() => authStore.isAuthenticated());
 const userInfo = computed(() => authStore.user || { email: 'Không có email', role: 'CUSTOMER' });
 
-// Theo dõi thay đổi của accessToken để cập nhật UI và lấy giỏ hàng
 watchEffect(async () => {
   if (authStore.accessToken) {
-    await authStore.fetchUserInfo(); // Load user info ngay sau khi login
-    await cartStore.fetchCart(); // Load giỏ hàng ngay sau khi login
+    await authStore.fetchUserInfo();
+    await cartStore.fetchCart();
   } else {
-    cartStore.cart = null; // Xóa giỏ hàng khi đăng xuất
+    cartStore.cart = null;
   }
 });
 
-// Xử lý đăng xuất
 const handleLogout = async () => {
   await authStore.logout();
-  router.push('/login'); // Quay về trang login
+  router.push('/login');
 };
 </script>
 
 <style scoped>
 .navbar {
   border-bottom: 2px solid #007bff;
+  z-index: 1060; /* Đảm bảo header nằm trên modal */
 }
 .nav-link {
   font-weight: 500;

@@ -1,11 +1,12 @@
 // src/stores/UserStore.js
 import { defineStore } from "pinia";
 import axiosInstance from "@/axios/axiosInstance";
-import { useAuthStore } from "./AuthStore"; // Thêm import AuthStore
+import { useAuthStore } from "./AuthStore";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
     user: null, // Lưu thông tin người dùng
+    addresses: [], // Lưu danh sách địa chỉ
     error: null, // Lưu thông báo lỗi nếu có
   }),
 
@@ -19,7 +20,7 @@ export const useUserStore = defineStore("user", {
         });
 
         if (response.data.status === 200) {
-          this.user = response.data.data; // Lưu thông tin người dùng
+          this.user = response.data.data;
           this.error = null;
           return { success: true, message: "Đăng ký thành công!" };
         } else {
@@ -34,6 +35,7 @@ export const useUserStore = defineStore("user", {
     },
 
     async updateUser({ email, fullname, phone, image }) {
+      const authStore = useAuthStore();
       try {
         const formData = new FormData();
         formData.append("email", email);
@@ -49,10 +51,15 @@ export const useUserStore = defineStore("user", {
           },
         });
 
-        // Cập nhật state với dữ liệu từ backend
-        this.user = response.data;
-        this.error = null;
-        return { success: true, message: "Cập nhật hồ sơ thành công!" };
+        if (response.data.status === 200) {
+          this.user = response.data.data;
+          authStore.user = this.user;
+          this.error = null;
+          return { success: true, message: "Cập nhật hồ sơ thành công!" };
+        } else {
+          this.error = response.data.message;
+          return { success: false, message: response.data.message };
+        }
       } catch (error) {
         console.error("❌ Lỗi khi cập nhật hồ sơ:", error);
         this.error = error.response?.data?.message || "Cập nhật thất bại!";
@@ -75,15 +82,35 @@ export const useUserStore = defineStore("user", {
           isDefault,
           email,
         };
-        console.log("Dữ liệu gửi lên backend:", payload); // Debug ở đây
+        console.log("Dữ liệu gửi lên backend:", payload);
         const response = await axiosInstance.post("/address/create", payload);
-        this.user.addresses = this.user.addresses || [];
-        this.user.addresses.push(response.data);
-        return { success: true, message: "Thêm địa chỉ thành công!" };
+
+        if (response.data.status === 200) {
+          this.error = null;
+          return { success: true, message: "Thêm địa chỉ thành công!" };
+        } else {
+          this.error = response.data.message;
+          return { success: false, message: response.data.message };
+        }
       } catch (error) {
         console.error("❌ Lỗi khi thêm địa chỉ:", error);
         this.error = error.response?.data?.message || "Thêm địa chỉ thất bại!";
         return { success: false, message: this.error };
+      }
+    },
+
+    async fetchAddresses(email) {
+      try {
+        const response = await axiosInstance.get(`/address?email=${email}`);
+        if (response.data.status === 200) {
+          this.addresses = response.data.data;
+          this.error = null;
+        } else {
+          this.error = response.data.message;
+        }
+      } catch (error) {
+        console.error("❌ Lỗi khi lấy danh sách địa chỉ:", error);
+        this.error = error.response?.data?.message || "Lấy danh sách địa chỉ thất bại!";
       }
     },
 
@@ -98,5 +125,6 @@ export const useUserStore = defineStore("user", {
 
   getters: {
     getUser: (state) => state.user,
+    getAddresses: (state) => state.addresses,
   },
 });

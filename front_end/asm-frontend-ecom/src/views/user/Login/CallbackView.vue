@@ -32,7 +32,7 @@
     setTimeout(() => {
       console.log("✅ Đã chờ 2 giây, chuyển hướng về trang chủ...");
       router.push('/');
-    }, 2000);
+    }, 3000);
   });
   </script>
   
