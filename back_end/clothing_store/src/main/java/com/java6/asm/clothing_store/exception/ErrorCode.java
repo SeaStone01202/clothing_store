@@ -79,7 +79,10 @@ public enum ErrorCode {
     RESPONSE_NOT_FOUND(1202, "Không tìm thấy phản hồi!", HttpStatus.NOT_FOUND),
     UNCATEGORIZED_EXCEPTION(1299, "Lỗi không xác định!", HttpStatus.INTERNAL_SERVER_ERROR),
 
-    CATEGORY_NOT_FOUND(1301, "Không tìm thấy thể loại", HttpStatus.NOT_FOUND);
+    CATEGORY_NOT_FOUND(1301, "Không tìm thấy thể loại", HttpStatus.NOT_FOUND),
+
+    EMAIL_SEND_FAILED(1400, "Gửi email thất bại!", HttpStatus.INTERNAL_SERVER_ERROR)
+    ;
 
     private final int code;
     private final String message;

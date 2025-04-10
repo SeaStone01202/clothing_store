@@ -43,6 +43,19 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET}
             redirect-uri: ${GOOGLE_REDIRECT_URI}
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: haithach.01202@gmail.com
+    password: mqfqrkokdvjwhevk
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
 admin:
   email: ${ADMIN_EMAIL:admin@gmail.com}
   password: ${ADMIN_PASSWORD:admin123}

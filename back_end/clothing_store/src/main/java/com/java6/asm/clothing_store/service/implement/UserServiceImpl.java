@@ -14,7 +14,10 @@ import com.java6.asm.clothing_store.exception.AppException;
 import com.java6.asm.clothing_store.exception.ErrorCode;
 import com.java6.asm.clothing_store.repository.UserRepository;
 import com.java6.asm.clothing_store.service.UserService;
+import com.java6.asm.clothing_store.utils.EmailUtil;
+import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,9 +27,10 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -36,6 +40,8 @@ public class UserServiceImpl implements UserService {
     private final UserResponseMapper userResponseMapper;
 
     private final Cloudinary cloudinary;
+
+    private final EmailUtil emailUtil;
 
     @Transactional
     @Override
@@ -127,4 +133,30 @@ public class UserServiceImpl implements UserService {
                 .map(userResponseMapper::toResponse)
                 .toList();
     }
+
+    @Transactional
+    @Override
+    public boolean forgotPassword(String email) {
+        // 1. Kiểm tra email có tồn tại không
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // 2. Tạo mật khẩu mới bằng UUID
+        String newPassword = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+
+        // 3. Mã hóa và lưu lại mật khẩu mới
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // 4. Gửi email mật khẩu mới
+        try {
+            emailUtil.sendOtpEmail(email, newPassword);
+        } catch (MessagingException e) {
+            throw new AppException(ErrorCode.EMAIL_SEND_FAILED); // Bạn có thể tạo error code này
+        }
+
+        return true;
+    }
+
+
 }

@@ -1,4 +1,4 @@
-package com.java6.asm.clothing_store.unittest;
+package com.java6.asm.clothing_store.yc3;
 
 import com.java6.asm.clothing_store.constance.RoleEnum;
 import com.java6.asm.clothing_store.constance.StatusEnum;

@@ -3,9 +3,7 @@ package com.java6.asm.clothing_store.dto.response;
 import com.java6.asm.clothing_store.constance.RoleEnum;
 import com.java6.asm.clothing_store.constance.StatusEnum;
 import com.java6.asm.clothing_store.constance.TypeAccountEnum;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter

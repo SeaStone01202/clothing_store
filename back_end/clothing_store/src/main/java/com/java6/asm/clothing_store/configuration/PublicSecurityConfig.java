@@ -17,12 +17,14 @@ public class PublicSecurityConfig {
 
     // Nhóm endpoint public cho ProductController
     private static final String[] productUrls = {
+            "/product",
             "/product/list",
             "/product/category/**"
     };
 
     // Nhóm endpoint public cho CategoryController
     private static final String[] categoryUrls = {
+            "/category/status",
             "/category"
     };
 
@@ -37,7 +39,8 @@ public class PublicSecurityConfig {
             "/auth/system/login",
             "/user/register",
             "/swagger-ui/**",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/user/forgot_password",
     };
 
     // Gộp tất cả thành publicUrls

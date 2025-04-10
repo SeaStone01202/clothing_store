@@ -2,6 +2,7 @@ package com.java6.asm.clothing_store.controller;
 
 import com.java6.asm.clothing_store.dto.ApiResponse;
 import com.java6.asm.clothing_store.dto.request.ChangeRoleUserRequest;
+import com.java6.asm.clothing_store.dto.request.FortgotPasswordUserRequest;
 import com.java6.asm.clothing_store.dto.request.UserRegisterRequest;
 import com.java6.asm.clothing_store.dto.request.UserUpdateRequest;
 import com.java6.asm.clothing_store.dto.response.UserResponse;
@@ -43,5 +44,10 @@ public class UserController {
     @PutMapping("/role")
     public ResponseEntity<ApiResponse<Boolean>> changeRoleUser(@RequestBody ChangeRoleUserRequest request) {
         return ResponseEntity.ok(ApiResponse.success(userService.updateRole(request.getEmailUserChangeRole(), request.getRole())));
+    }
+
+    @PostMapping("/forgot_password")
+    public ResponseEntity<ApiResponse<Boolean>> forgotPassword(@RequestBody FortgotPasswordUserRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(userService.forgotPassword(request.getEmail())));
     }
 }

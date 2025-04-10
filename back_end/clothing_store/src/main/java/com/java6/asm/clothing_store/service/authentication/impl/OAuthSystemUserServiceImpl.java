@@ -5,6 +5,7 @@ import com.java6.asm.clothing_store.dto.mapper.UserResponseMapper;
 import com.java6.asm.clothing_store.dto.request.UserRequest;
 import com.java6.asm.clothing_store.dto.response.AuthResponse;
 import com.java6.asm.clothing_store.dto.response.UserResponse;
+import com.java6.asm.clothing_store.entity.User;
 import com.java6.asm.clothing_store.exception.AppException;
 import com.java6.asm.clothing_store.exception.ErrorCode;
 import com.java6.asm.clothing_store.repository.UserRepository;
@@ -40,19 +41,19 @@ public class OAuthSystemUserServiceImpl implements OAuthSystemUserService {
     @Override
     public AuthResponse authenticateAndGenerateTokens(UserRequest request, HttpServletResponse response) {
 
-        UserResponse userChecked = userRepository
-                .findByEmailAndStatus(request.getEmail(), StatusEnum.ACTIVE)
-                .filter(user -> passwordEncoder.matches(request.getPassword(), user.getPassword()))
-                .map(userResponseMapper::toResponse)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        Optional<User> user = Optional.ofNullable(userRepository.findByEmailAndStatus(request.getEmail(), StatusEnum.ACTIVE).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
 
-        String email = userChecked.getEmail();
+        if (!passwordEncoder.matches(request.getPassword(), user.get().getPassword())) {
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
+        }
+
+        String email = user.get().getEmail();
 
         String deviceId = request.getDeviceId();
 
         String refreshToken = deviceManagementService.getOrGenerateRefreshToken(email, deviceId);
 
-        String accessToken = jwtAccessTokenService.generateToken(email.trim(), userChecked.getRole());
+        String accessToken = jwtAccessTokenService.generateToken(email.trim(), user.get().getRole());
 
         Cookie refreshTokenCookie = createRefreshTokenCookie(refreshToken);
 

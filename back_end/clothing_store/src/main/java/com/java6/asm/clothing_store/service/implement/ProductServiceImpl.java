@@ -8,6 +8,7 @@ import com.java6.asm.clothing_store.repository.ProductRepository;
 import com.java6.asm.clothing_store.service.ProductService;
 import com.java6.asm.clothing_store.utils.PageUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
         return null;
     }
 
-//    @Cacheable(value = "products", key = "'all:page:' + #page")
+    @Cacheable(value = "products", key = "'all:page:' + #page")
     @Override
     public Page<ProductResponse> findAll(int page) {
         Pageable pageable = pageUtil.createPageable(page);

@@ -1,12 +1,10 @@
-package com.java6.asm.clothing_store.unittest;
+package com.java6.asm.clothing_store.yc3;
 
 import com.java6.asm.clothing_store.constance.RoleEnum;
 import com.java6.asm.clothing_store.constance.StatusEnum;
-import com.java6.asm.clothing_store.constance.TypeAccountEnum;
 import com.java6.asm.clothing_store.dto.mapper.UserResponseMapper;
 import com.java6.asm.clothing_store.dto.request.UserRequest;
 import com.java6.asm.clothing_store.dto.response.AuthResponse;
-import com.java6.asm.clothing_store.dto.response.UserResponse;
 import com.java6.asm.clothing_store.entity.User;
 import com.java6.asm.clothing_store.exception.AppException;
 import com.java6.asm.clothing_store.exception.ErrorCode;

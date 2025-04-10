@@ -22,6 +22,8 @@ public interface UserService {
     boolean updateRole(String emailUserChangeRole, RoleEnum role);
 
     List<UserResponse> retrieveAllUsers();
+    boolean forgotPassword(String email);
+
 
 
 }
