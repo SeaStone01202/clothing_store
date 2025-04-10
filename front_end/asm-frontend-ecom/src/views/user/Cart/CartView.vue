@@ -2,25 +2,41 @@
   <div class="container mt-5">
     <h1 class="text-center text-primary fw-bold mb-4">🛒 Giỏ hàng của bạn</h1>
 
-    <!-- Hiển thị trạng thái loading -->
+    <!-- Loading -->
     <div v-if="cartStore.loading" class="text-center mb-4">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Đang tải...</span>
       </div>
     </div>
 
-    <!-- Hiển thị lỗi nếu có -->
-    <div v-if="cartStore.error" class="alert alert-danger text-center" role="alert">
-      {{ cartStore.error }}
+    <!-- Thông báo -->
+    <div v-if="errorMessage" class="alert alert-danger text-center py-2" role="alert">
+      {{ errorMessage }}
+    </div>
+    <div v-if="successMessage" class="alert alert-success text-center py-2" role="alert">
+      {{ successMessage }}
     </div>
 
-    <!-- Hiển thị giỏ hàng -->
-    <div v-if="!cartStore.loading && (!cartStore.cart || !cartStore.cart.cartDetails || cartStore.cart.cartDetails.length === 0)" class="text-center text-muted">
+    <!-- Giỏ hàng trống -->
+    <div
+      v-if="!cartStore.loading && (!cartStore.cart || !cartStore.cart.cartDetails || cartStore.cart.cartDetails.length === 0)"
+      class="text-center text-muted"
+    >
       Chưa có sản phẩm nào trong giỏ hàng.
     </div>
-    <div v-else-if="cartStore.cart && cartStore.cart.cartDetails && cartStore.cart.cartDetails.length > 0" class="row">
+
+    <!-- Giỏ hàng có sản phẩm -->
+    <div
+      v-else-if="cartStore.cart && cartStore.cart.cartDetails && cartStore.cart.cartDetails.length > 0"
+      class="row"
+    >
       <div class="col-md-8">
-        <div class="card mb-3 mx-auto" v-for="item in cartStore.cart.cartDetails" :key="item.id" style="max-width: 250px;">
+        <div
+          class="card mb-3 mx-auto"
+          v-for="item in cartStore.cart.cartDetails"
+          :key="item.id"
+          style="max-width: 250px;"
+        >
           <div class="text-center">
             <img
               :src="item.productImageUrl || 'https://placehold.co/300x300?text=No+Image'"
@@ -36,20 +52,31 @@
               {{ item.productPrice ? item.productPrice.toLocaleString() : '0' }} VND
             </p>
             <div class="d-flex justify-content-end align-items-center">
-              <button class="btn btn-outline-secondary btn-sm me-1" @click="decreaseQuantity(item.id)" :disabled="item.quantity <= 1">-</button>
+              <button
+                class="btn btn-outline-secondary btn-sm me-1"
+                @click="decreaseQuantity(item.id)"
+                :disabled="item.quantity <= 1"
+              >
+                -
+              </button>
               <span class="me-1">Số lượng: {{ item.quantity }}</span>
-              <button class="btn btn-outline-secondary btn-sm me-1" @click="increaseQuantity(item.id)">+</button>
-              <button class="btn btn-danger btn-sm" @click="cartStore.removeFromCart(item.id)">🗑</button>
+              <button
+                class="btn btn-outline-secondary btn-sm me-1"
+                @click="increaseQuantity(item.id)"
+              >
+                +
+              </button>
+              <button class="btn btn-danger btn-sm" @click="removeItem(item.id)">🗑</button>
             </div>
           </div>
         </div>
       </div>
+
       <div class="col-md-4">
         <div class="card p-3">
-          <!-- Form xác nhận thanh toán -->
           <h5 class="fw-bold mb-3">Xác nhận thanh toán</h5>
 
-          <!-- Tên người dùng -->
+          <!-- Họ tên -->
           <div class="mb-3">
             <label for="fullName" class="form-label">Tên người nhận</label>
             <input
@@ -63,7 +90,7 @@
             />
           </div>
 
-          <!-- Số điện thoại -->
+          <!-- SĐT -->
           <div class="mb-3">
             <label for="phoneNumber" class="form-label">Số điện thoại</label>
             <input
@@ -77,7 +104,7 @@
             />
           </div>
 
-          <!-- Chọn địa chỉ giao hàng -->
+          <!-- Địa chỉ -->
           <div class="mb-3">
             <label for="address" class="form-label">Địa chỉ giao hàng</label>
             <div v-if="addresses.length === 0" class="alert alert-warning">
@@ -125,12 +152,9 @@
           </div>
 
           <!-- Tổng tiền -->
-          <h5 class="fw-bold mb-3">Tổng tiền: {{ cartStore.totalPrice ? cartStore.totalPrice.toLocaleString() : '0' }} VND</h5>
-
-          <!-- Thông báo lỗi -->
-          <div v-if="errorMessage" class="alert alert-danger py-2 text-center">
-            {{ errorMessage }}
-          </div>
+          <h5 class="fw-bold mb-3">
+            Tổng tiền: {{ cartStore.totalPrice ? cartStore.totalPrice.toLocaleString() : '0' }} VND
+          </h5>
 
           <!-- Nút Thanh toán -->
           <button
@@ -148,7 +172,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useCartStore } from '@/stores/CartStore';
 import { useAuthStore } from '@/stores/AuthStore';
 import { useUserStore } from '@/stores/UserStore';
@@ -165,64 +189,103 @@ const paymentMethod = ref(null);
 const fullName = ref('');
 const phoneNumber = ref('');
 const errorMessage = ref('');
+const successMessage = ref('');
 const isOrderLoading = ref(false);
+
+const clearMessages = () => {
+  errorMessage.value = '';
+  successMessage.value = '';
+};
+
+watch([errorMessage, successMessage], () => {
+  if (errorMessage.value || successMessage.value) {
+    setTimeout(() => clearMessages(), 2000);
+  }
+});
 
 onMounted(async () => {
   if (authStore.isAuthenticated() && authStore.user) {
     await cartStore.fetchCart();
-
-    // Lấy danh sách địa chỉ
     await userStore.fetchAddresses(authStore.user.email);
     addresses.value = userStore.getAddresses;
-    if (addresses.value.length > 0) {
-      selectedAddress.value = addresses.value.find(addr => addr.isDefault) || addresses.value[0];
-    }
-
-    // Lấy thông tin người dùng
+    selectedAddress.value =
+      addresses.value.find((addr) => addr.isDefault) || addresses.value[0];
     fullName.value = authStore.user.fullName || '';
     phoneNumber.value = authStore.user.phoneNumber || '';
   } else {
-    cartStore.error = 'Vui lòng đăng nhập để xem giỏ hàng';
+    errorMessage.value = 'Vui lòng đăng nhập để xem giỏ hàng.';
   }
 });
 
-const handleImageError = (event) => {
-  event.target.src = 'https://placehold.co/300x300?text=No+Image';
-};
-
+// Trong <script setup>
 const decreaseQuantity = async (cartDetailId) => {
-  await cartStore.decreaseQuantity(cartDetailId);
+  clearMessages();
+  try {
+    const result = await cartStore.decreaseQuantity(cartDetailId);
+    if (result.status === 200) {
+      successMessage.value = 'Đã giảm số lượng sản phẩm.';
+    } else {
+      errorMessage.value = result.data?.message || 'Không thể giảm số lượng.';
+    }
+  } catch (error) {
+    errorMessage.value = 'Có lỗi xảy ra khi giảm số lượng.';
+    console.error('Error in decreaseQuantity:', error);
+  }
 };
 
 const increaseQuantity = async (cartDetailId) => {
-  await cartStore.increaseQuantity(cartDetailId);
+  clearMessages();
+  try {
+    const result = await cartStore.increaseQuantity(cartDetailId);
+    if (result.status === 200) {
+      successMessage.value = 'Đã tăng số lượng sản phẩm.';
+    } else {
+      errorMessage.value = result.data?.message || 'Không thể tăng số lượng.';
+    }
+  } catch (error) {
+    errorMessage.value = 'Có lỗi xảy ra khi tăng số lượng.';
+    console.error('Error in increaseQuantity:', error);
+  }
+};
+
+const removeItem = async (cartDetailId) => {
+  clearMessages();
+  try {
+    const result = await cartStore.removeFromCart(cartDetailId);
+    if (result.status === 200) {
+      successMessage.value = 'Đã xóa sản phẩm khỏi giỏ hàng.';
+    } else {
+      errorMessage.value = result.data?.message || 'Không thể xóa sản phẩm.';
+    }
+  } catch (error) {
+    errorMessage.value = 'Có lỗi xảy ra khi xóa sản phẩm.';
+    console.error('Error in delete:', error);
+  }
 };
 
 const placeOrder = async () => {
+  clearMessages();
+
   if (!fullName.value) {
     errorMessage.value = 'Vui lòng nhập tên người nhận!';
     return;
   }
-
   if (!phoneNumber.value) {
     errorMessage.value = 'Vui lòng nhập số điện thoại!';
     return;
   }
-
   if (!selectedAddress.value) {
     errorMessage.value = 'Vui lòng chọn địa chỉ giao hàng!';
     return;
   }
-
   if (!paymentMethod.value) {
     errorMessage.value = 'Vui lòng chọn phương thức thanh toán!';
     return;
   }
 
   isOrderLoading.value = true;
-  errorMessage.value = '';
   try {
-    const orderDetails = cartStore.cart.cartDetails.map(item => ({
+    const orderDetails = cartStore.cart.cartDetails.map((item) => ({
       productId: item.productId,
       quantity: item.quantity,
       price: item.productPrice,
@@ -237,14 +300,13 @@ const placeOrder = async () => {
     };
 
     const result = await orderStore.createOrder(orderData);
-
-    if (result.success) {
-      alert(result.message);
-      await cartStore.fetchCart(); // Làm mới giỏ hàng
+    if (result?.success) {
+      successMessage.value = result.message || 'Đặt hàng thành công!';
+      await cartStore.fetchCart();
     } else {
-      errorMessage.value = result.message;
+      errorMessage.value = result?.message || 'Không thể đặt hàng.';
     }
-  } catch (error) {
+  } catch {
     errorMessage.value = 'Có lỗi xảy ra khi đặt hàng!';
   } finally {
     isOrderLoading.value = false;

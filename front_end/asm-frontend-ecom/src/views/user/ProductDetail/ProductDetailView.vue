@@ -1,5 +1,10 @@
 <template>
   <div class="container mt-5">
+    <!-- Thông báo -->
+    <div v-if="notification.visible" :class="['alert', notification.type === 'success' ? 'alert-success' : 'alert-danger', 'text-center']" role="alert">
+      {{ notification.message }}
+    </div>
+
     <!-- Hiển thị trạng thái loading -->
     <div v-if="productStore.loading || cartStore.loading" class="text-center mb-4">
       <div class="spinner-border text-primary" role="status">
@@ -84,7 +89,7 @@
         </div>
       </div>
 
-      <!-- Phân trang cho sản phẩm liên quan -->
+      <!-- Phân trang -->
       <nav v-if="productStore.relatedProducts.length">
         <ul class="pagination justify-content-center mt-4">
           <li class="page-item" :class="{ disabled: productStore.relatedProductsPage === 1 }">
@@ -115,6 +120,13 @@ const cartStore = useCartStore();
 
 const quantity = ref(1);
 
+// Biến để hiển thị thông báo
+const notification = ref({
+  message: '',
+  type: '', // success hoặc error
+  visible: false,
+});
+
 const loadProductDetail = async (productId) => {
   await productStore.fetchProductDetail(productId);
   if (productStore.productDetail) {
@@ -127,7 +139,6 @@ onMounted(async () => {
   await loadProductDetail(productId);
 });
 
-// Theo dõi thay đổi route để tải lại sản phẩm khi bấm vào sản phẩm liên quan
 watch(() => route.params.id, async (newId) => {
   const productId = parseInt(newId);
   await loadProductDetail(productId);
@@ -138,9 +149,21 @@ const addToCart = async () => {
 
   const success = await cartStore.addProductToCart(productStore.productDetail.id, quantity.value);
   if (success) {
-    alert('Sản phẩm đã được thêm vào giỏ hàng!');
-    router.push('/cart'); // Chuyển hướng đến giỏ hàng sau khi thêm
+    showNotification('Sản phẩm đã được thêm vào giỏ hàng!', 'success');
+  } else {
+    showNotification('Không thể thêm sản phẩm vào giỏ hàng.', 'error');
   }
+};
+
+const showNotification = (message, type) => {
+  notification.value = {
+    message,
+    type,
+    visible: true,
+  };
+  setTimeout(() => {
+    notification.value.visible = false;
+  }, 3000); // Ẩn sau 3 giây
 };
 
 const handleImageError = (event) => {

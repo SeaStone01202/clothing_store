@@ -75,6 +75,7 @@ export const useCartStore = defineStore('cart', {
         const response = await axiosInstance.delete(`/cart/details/${cartDetailId}`);
         if (response.data.status === 200) {
           this.cart.cartDetails = this.cart.cartDetails.filter(detail => detail.id !== cartDetailId);
+          return response;
         } else {
           throw new Error(response.data.message || 'Không thể xóa sản phẩm khỏi giỏ hàng');
         }
@@ -104,6 +105,7 @@ export const useCartStore = defineStore('cart', {
           });
           if (response.data.status === 200) {
             await this.fetchCart();
+            return response;
           } else {
             throw new Error(response.data.message || 'Không thể giảm số lượng sản phẩm');
           }
@@ -131,6 +133,7 @@ export const useCartStore = defineStore('cart', {
         });
         if (response.data.status === 200) {
           await this.fetchCart();
+          return response;
         } else {
           throw new Error(response.data.message || 'Không thể tăng số lượng sản phẩm');
         }

@@ -56,6 +56,10 @@
         <div v-if="errorMessage" class="alert alert-danger py-2 text-center">
           {{ errorMessage }}
         </div>
+        <!-- 🔹 Thông báo thành công -->
+        <div v-if="successMessage" class="alert alert-success py-2 text-center">
+          {{ successMessage }}
+        </div>
 
         <!-- 🔹 Nút Đăng ký -->
         <div class="d-grid">
@@ -91,6 +95,8 @@ const loading = ref(false);
 
 const userStore = useUserStore();
 const router = useRouter();
+const successMessage = ref("");
+
 
 /**
  * ✅ Xử lý đăng ký
@@ -116,12 +122,13 @@ const handleRegister = async () => {
   });
 
   if (result.success) {
-    // Đăng ký thành công, chuyển hướng về trang đăng nhập
+  successMessage.value = "🎉 Đăng ký thành công! Vui lòng đăng nhập.";
+  setTimeout(() => {
     router.push("/login");
-  } else {
-    // Hiển thị thông báo lỗi
-    errorMessage.value = result.message;
-  }
+  }, 2000); // chuyển trang sau 2s
+} else {
+  errorMessage.value = result.message;
+}
 
   loading.value = false;
 };
