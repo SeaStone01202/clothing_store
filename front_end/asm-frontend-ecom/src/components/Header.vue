@@ -52,12 +52,8 @@
                 <li class="dropdown-item">👋 Xin chào: {{ userInfo.email || "Người dùng" }}</li>
                 <li><router-link class="dropdown-item" to="/edit-profile">✏️ Chỉnh sửa hồ sơ</router-link></li>
                 <li><router-link class="dropdown-item" to="/order-history">📜 Lịch sử mua hàng</router-link></li>
-                <li v-if="userInfo.role === 'DIRECTOR', 'STAFF' ">
+                <li v-if="['DIRECTOR', 'STAFF'].includes(userInfo.role)">
                   <router-link class="dropdown-item" to="/AdminDashboard">⚙️ Admin Dashboard</router-link>
-                  <router-link class="dropdown-item" to="/AdminOrderView">⚙️ Admin Order View</router-link>
-                  <router-link class="dropdown-item" to="/AdminProductView">⚙️ Admin Product View</router-link>
-                  <router-link class="dropdown-item" to="/AdminUserView">⚙️ Admin User View</router-link>
-                  <router-link class="dropdown-item" to="/AdminCategoryView">⚙️ Admin Category View</router-link>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>

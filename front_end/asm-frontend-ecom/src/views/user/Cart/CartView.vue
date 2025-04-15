@@ -301,10 +301,10 @@ const placeOrder = async () => {
 
     const result = await orderStore.createOrder(orderData);
     if (result?.success) {
-      successMessage.value = result.message || 'Đặt hàng thành công!';
+      successMessage.value = 'Đặt hàng thành công!';
       await cartStore.fetchCart();
     } else {
-      errorMessage.value = result?.message || 'Không thể đặt hàng.';
+      errorMessage.value = 'Không thể đặt hàng.';
     }
   } catch {
     errorMessage.value = 'Có lỗi xảy ra khi đặt hàng!';

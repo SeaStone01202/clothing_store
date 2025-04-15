@@ -114,6 +114,23 @@ export const useUserStore = defineStore("user", {
       }
     },
 
+    async forgotPassword(email) {
+      try {
+        const response = await axiosInstance.post("/user/forgot_password", { email });
+        if (response.data.status === 200) {
+          this.error = null;
+          return { success: true, message: "Đã gửi email khôi phục mật khẩu!" };
+        } else {
+          this.error = response.data.message;
+          return { success: false, message: response.data.message };
+        }
+      } catch (error) {
+        console.error("❌ Lỗi khi gửi email khôi phục mật khẩu:", error);
+        this.error = error.response?.data?.message || "Gửi email khôi phục mật khẩu thất bại!";
+        return { success: false, message: this.error };
+      }
+    },
+
     clearError() {
       this.error = null;
     },

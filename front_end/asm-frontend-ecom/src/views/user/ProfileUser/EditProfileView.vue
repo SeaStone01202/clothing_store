@@ -1,7 +1,14 @@
-<!-- src/views/user/EditProfileView.vue -->
 <template>
   <div class="container mt-5">
     <h1 class="text-center text-primary fw-bold mb-4">✍️ Quản lý hồ sơ</h1>
+
+    <!-- Thông báo -->
+    <div v-if="errorMessage" class="alert alert-danger text-center py-2" role="alert">
+      {{ errorMessage }}
+    </div>
+    <div v-if="successMessage" class="alert alert-success text-center py-2" role="alert">
+      {{ successMessage }}
+    </div>
 
     <ul class="nav nav-tabs mb-4" id="profileTab" role="tablist">
       <li class="nav-item" role="presentation">
@@ -93,9 +100,6 @@
                 style="max-width: 200px;"
               />
             </div>
-            <div v-if="errorMessage" class="alert alert-danger py-2 text-center">
-              {{ errorMessage }}
-            </div>
             <button
               type="submit"
               class="btn btn-primary w-100"
@@ -121,9 +125,6 @@
           <!-- Phần danh sách địa chỉ -->
           <div class="mb-5">
             <h4 class="mb-3">Danh sách địa chỉ hiện có</h4>
-            <div v-if="errorMessage" class="alert alert-danger py-2 text-center">
-              {{ errorMessage }}
-            </div>
             <div v-if="isAddressListLoading" class="text-center">
               <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Đang tải...</span>
@@ -210,9 +211,6 @@
                 />
                 <label class="form-check-label" for="isDefault">Đặt làm địa chỉ mặc định</label>
               </div>
-              <div v-if="errorMessage" class="alert alert-danger py-2 text-center">
-                {{ errorMessage }}
-              </div>
               <button
                 type="submit"
                 class="btn btn-primary w-100"
@@ -256,6 +254,7 @@ const address = ref({
 
 const addresses = ref([]);
 const errorMessage = ref("");
+const successMessage = ref("");
 const isProfileLoading = ref(false);
 const isAddressLoading = ref(false);
 const isAddressListLoading = ref(false);
@@ -322,6 +321,7 @@ const onFileChange = (event) => {
 const saveProfile = async () => {
   isProfileLoading.value = true;
   errorMessage.value = "";
+  successMessage.value = "";
   try {
     const result = await userStore.updateUser({
       email: profile.value.email,
@@ -329,11 +329,15 @@ const saveProfile = async () => {
       phone: profile.value.phone,
       image: profile.value.image,
     });
-    if (result.success) {
-      alert(result.message);
-      profile.value.imageUrl = userStore.getUser?.image || profile.value.imageUrl;
+    console.log("result", result);
+    if (result?.success) {
+      successMessage.value = result.message || "Cập nhật hồ sơ thành công!";
+      // Cập nhật lại thông tin user trong authStore
+      await authStore.fetchUserInfo();
+      profile.value.imageUrl = authStore.user?.image || profile.value.imageUrl;
+      profile.value.image = null; // Reset input file
     } else {
-      errorMessage.value = result.message;
+      errorMessage.value = result.message || "Cập nhật hồ sơ thất bại!";
     }
   } catch (error) {
     errorMessage.value = "Có lỗi xảy ra khi cập nhật hồ sơ!";
@@ -345,6 +349,7 @@ const saveProfile = async () => {
 const saveAddress = async () => {
   isAddressLoading.value = true;
   errorMessage.value = "";
+  successMessage.value = "";
   try {
     const result = await userStore.addAddress({
       addressLine: address.value.addressLine,
@@ -354,7 +359,7 @@ const saveAddress = async () => {
       isDefault: address.value.isDefault,
     });
     if (result.success) {
-      alert(result.message);
+      successMessage.value = result.message || "Thêm địa chỉ thành công!";
       address.value = { addressLine: "", ward: "", district: "", city: "", isDefault: false };
       // Làm mới danh sách địa chỉ
       isAddressListLoading.value = true;
@@ -362,7 +367,7 @@ const saveAddress = async () => {
       addresses.value = userStore.getAddresses;
       isAddressListLoading.value = false;
     } else {
-      errorMessage.value = result.message;
+      errorMessage.value = result.message || "Thêm địa chỉ thất bại!";
     }
   } catch (error) {
     errorMessage.value = "Có lỗi xảy ra khi thêm địa chỉ!";
@@ -386,5 +391,9 @@ const saveAddress = async () => {
 h4 {
   color: #007bff;
   font-weight: 600;
+}
+.alert {
+  max-width: 800px;
+  margin: 0 auto 1rem;
 }
 </style>

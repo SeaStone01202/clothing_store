@@ -17,8 +17,9 @@ const zaloConfig = {
 };
 
 const loginWithZalo = () => {
-  const authUrl = `https://oauth.zaloapp.com/v4/permission?app_id=${zaloConfig.appId}&redirect_uri=${zaloConfig.redirectUri}&state=${zaloConfig.state}`;
-  window.location.href = authUrl; // Chuyển hướng user đến trang đăng nhập Zalo
+  // const authUrl = `https://oauth.zaloapp.com/v4/permission?app_id=${zaloConfig.appId}&redirect_uri=${zaloConfig.redirectUri}&state=${zaloConfig.state}`;
+  // window.location.href = authUrl; // Chuyển hướng user đến trang đăng nhập Zalo
+  alert("🚧 Chức năng đăng nhập bằng Zalo đang được phát triển. Vui lòng quay lại sau!");
 };
 </script>
 

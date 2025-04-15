@@ -14,25 +14,29 @@ export const useAuthStore = defineStore("auth", {
       this.accessToken = token;
       localStorage.setItem("accessToken", token);
       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      this.fetchUserInfo(); // Gọi API lấy thông tin user
     },
 
     async login(email, password) {
       try {
         const deviceId = await getDeviceFingerprint();
         const response = await axiosInstance.post("/auth/system/login", { email, password, deviceId });
-
+    
+        const { status, message, data } = response.data;
         if (response.data.status === 200) {
-          this.setAccessToken(response.data.data.accessToken);
+          this.setAccessToken(data.accessToken);
+          await this.fetchUserInfo();
           return { success: true, message: "Đăng nhập thành công!" };
         } else {
-          return { success: false, message: response.data.message };
+          return { success: false, message: message || "Đăng nhập thất bại!" };
         }
       } catch (error) {
         console.error("❌ Lỗi khi gửi request đăng nhập:", error);
-        return { success: false, message: "Sai tài khoản hoặc mật khẩu!" };
+        const message = error.response?.data?.message || "Lỗi không xác định khi đăng nhập!";
+        return { success: false, message };
       }
     },
+    
+    
 
     async refreshAccessToken() {
       try {

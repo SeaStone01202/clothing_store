@@ -53,7 +53,7 @@ import { useAuthStore } from "@/stores/AuthStore";
 import { useRouter } from "vue-router";
 import ZaloLoginButton from "./ZaloLoginButton.vue";
 
-// ✅ Trạng thái đăng nhập
+// Trạng thái form
 const email = ref("");
 const password = ref("");
 const errorMessage = ref("");
@@ -68,15 +68,25 @@ const handleLogin = async () => {
   errorMessage.value = "";
   loading.value = true;
 
-  const result = await authStore.login(email.value, password.value);
+  try {
+    const result = await authStore.login(email.value, password.value);
 
-  if (result.success) {
-    router.push("/"); // 🚀 Chuyển hướng về trang chủ
-  } else {
-    errorMessage.value = result.message; // ❌ Hiển thị lỗi
+    if (result.success) {
+      router.push("/"); // 🚀 Chuyển hướng về trang chủ
+    } else {
+      errorMessage.value = result.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại.";
+    }
+  } catch (err) {
+    errorMessage.value = "Đã có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại sau.";
+    console.error("Lỗi đăng nhập:", err);
+  } finally {
+    loading.value = false;
   }
-  
-  loading.value = false;
+
+  // ⏳ Tự ẩn thông báo sau vài giây (tuỳ chọn)
+  setTimeout(() => {
+    errorMessage.value = "";
+  }, 5000);
 };
 
 /**
@@ -84,9 +94,6 @@ const handleLogin = async () => {
  */
 const loginWithGoogle = () => {
   window.location.href = "http://localhost:8080/oauth2/authorization/google";
-  // https://clothingstoretest-production.up.railway.app/login/oauth2/code/google
-  // var loginWindow = window.open('https://clothingstoretest-production.up.railway.app/oauth2/authorization/google', 'Google Login', 'width=500,height=600');
-  // var loginWindow = window.open('http://localhost:8080/oauth2/authorization/google', 'Google Login', 'width=500,height=600');
 };
 </script>
 
