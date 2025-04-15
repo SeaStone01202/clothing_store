@@ -18,7 +18,7 @@ public enum ErrorCode {
     EMAIL_INVALID(203, "Email không hợp lệ hoặc đang trống!", HttpStatus.BAD_REQUEST),
     PASSWORD_INVALID(204, "Mật khẩu không hợp lệ hoặc đang trống!", HttpStatus.BAD_REQUEST),
     FULLNAME_INVALID(205, "Họ tên không hợp lệ hoặc đang trống!", HttpStatus.BAD_REQUEST),
-    INVALID_CREDENTIALS(206, "Email hoặc mật khẩu không đúng!", HttpStatus.UNAUTHORIZED),
+    INVALID_CREDENTIALS(206, "Email hoặc mật khẩu không đúng!", HttpStatus.BAD_REQUEST),
     USER_BlOCKED(207, "Người dùng đã bị khoóa", HttpStatus.BAD_REQUEST),
 
     // 🔥 Lỗi Authentication/Authorization (300-399)

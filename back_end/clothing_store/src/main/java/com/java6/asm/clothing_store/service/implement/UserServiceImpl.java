@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'STAFF', 'DIRECTOR')")
     @Override
     public UserResponse updateUser(UserUpdateRequest request) {
 
@@ -137,22 +137,18 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public boolean forgotPassword(String email) {
-        // 1. Kiểm tra email có tồn tại không
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        // 2. Tạo mật khẩu mới bằng UUID
         String newPassword = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
 
-        // 3. Mã hóa và lưu lại mật khẩu mới
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        // 4. Gửi email mật khẩu mới
         try {
             emailUtil.sendOtpEmail(email, newPassword);
         } catch (MessagingException e) {
-            throw new AppException(ErrorCode.EMAIL_SEND_FAILED); // Bạn có thể tạo error code này
+            throw new AppException(ErrorCode.EMAIL_SEND_FAILED);
         }
 
         return true;

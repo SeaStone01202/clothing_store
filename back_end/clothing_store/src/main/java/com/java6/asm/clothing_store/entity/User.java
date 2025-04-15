@@ -66,7 +66,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses;
 
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDate.now();

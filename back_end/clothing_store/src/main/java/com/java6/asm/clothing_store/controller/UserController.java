@@ -32,8 +32,8 @@ public class UserController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<UserResponse> updateUser(@ModelAttribute UserUpdateRequest request) {
-        return ResponseEntity.ok(userService.updateUser(request));
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(@ModelAttribute UserUpdateRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(userService.updateUser(request)));
     }
 
     @PutMapping("/status")
